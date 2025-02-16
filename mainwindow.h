@@ -32,6 +32,9 @@ private slots:
     void on_Search_clicked();
     void on_Add_clicked();
 
+    void on_Edit_clicked();
+    void sortStudents();
+
 private:
     Ui::MainWindow *ui;
     QStandardItemModel *studentModel;
@@ -46,6 +49,5 @@ private:
     void loadCSVStudents(const QString &filePath = "");
     void loadCSVProgram(const QString &filePath = "");
     void loadCSVCollege(const QString &filePath= "");
-    void sortStudents(int index);
 };
 #endif // MAINWINDOW_H
