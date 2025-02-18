@@ -24,12 +24,12 @@ MainWindow::MainWindow(QWidget *parent)
     collegeModel = new QStandardItemModel(this);
     studentProxyModel = new QSortFilterProxyModel(this);
 
-    loadCSVStudents("C://Users/Kristelle//Documents//BSCS-3/CCC151 - Database Management//CSV Project/CSV1//Student.csv");
-    loadCSVProgram("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CSV Project//CSV1//Program.csv");
-    loadCSVCollege("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CSV Project//CSV1//College.csv");
+    loadCSVStudents("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv");
+    loadCSVProgram("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV/Program.csv");
+    loadCSVCollege("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv");
 
     ui->StudentTable->setModel(studentModel);
-    ui->StudentTable->resizeColumnsToContents();
+    //ui->StudentTable->resizeColumnsToContents();
     ui->ProgTable->setModel(programModel);
     ui->ProgTable->resizeColumnsToContents();
     ui->CollegeTable->setModel(collegeModel);
@@ -43,9 +43,14 @@ MainWindow::MainWindow(QWidget *parent)
     studentProxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
     studentProxyModel->setSortRole(Qt::DisplayRole);
 
-    // Connect ComboBox selection change to sorting function
-    connect(ui->Sort, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::sortStudents);
+    ui->StudentTable->setSortingEnabled(true);
+    ui->ProgTable->setSortingEnabled(true);
+
+    // Enable column headers sorting directly
+    ui->StudentTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder); // Default sorting by the first column
+    ui->ProgTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -70,31 +75,16 @@ void MainWindow::loadCSVStudents(const QString &filePath)
 
     QTextStream in(&file);
 
-
     if (!in.atEnd())
         in.readLine();  // Skip the header row
 
-    QStringList allLines;
     while (!in.atEnd())
     {
         QString line = in.readLine().trimmed();
 
-        if (!line.isEmpty())
-            allLines.append(line);
-    }
+        if (line.isEmpty())
+            continue;  // Ignore empty lines
 
-    if (!allLines.isEmpty() && !allLines.last().isEmpty())
-    {
-        allLines.append(allLines.last());
-    }
-
-    file.close();  // Close after reading
-
-    if (allLines.isEmpty())
-        return;
-
-    for (const QString &line : allLines)
-    {
         QStringList rowData = line.split(',');
 
         // Ensure exactly 7 columns
@@ -112,8 +102,9 @@ void MainWindow::loadCSVStudents(const QString &filePath)
         studentModel->appendRow(items);
     }
 
+    file.close();  // Close after reading
+
     studentModel->setHorizontalHeaderLabels({"I.D. Number", "Last Name", "First Name", "Middle Name", "Year Level", "Gender", "Course Code"});
-    ui->StudentTable->resizeColumnsToContents();
 }
 
 
@@ -125,16 +116,24 @@ void MainWindow::loadCSVProgram(const QString &filePath)
     currentCSVProgram = filePath;
 
     QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly))
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream in(&file);
         int row = 0;
+
+        if (!in.atEnd()) // Skip the first line (header)
+            in.readLine();
+
         while (!in.atEnd())
         {
-            QString value = in.readLine();
+            QString value = in.readLine().trimmed(); // Trim any extra spaces or newlines
+
+            if (value.isEmpty()) // Ignore empty lines
+                continue;
+
             QStringList rLine = value.split(',');
 
-            if (rLine.size() > 0) // Assuming second column contains course name
+            if (rLine.size() > 1) // Assuming the first column contains course name
             {
                 ui->CourseComboBox->addItem(rLine.at(0)); // Add course to ComboBox
             }
@@ -143,34 +142,47 @@ void MainWindow::loadCSVProgram(const QString &filePath)
 
             for (int i = 0; i < rLine.size(); i++)
             {
-                QString value = rLine.at(i);
-                QStandardItem *item = new QStandardItem(value);
-
+                QStandardItem *item = new QStandardItem(rLine.at(i).trimmed());
                 item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-
                 programModel->setItem(row, i, item);
             }
             row++;
         }
         file.close();
     }
+
     programModel->setHorizontalHeaderLabels({"Program", "Program Name", "College Code"});
 }
+
+
 void MainWindow::loadCSVCollege(const QString &filePath)
 {
     collegeModel->clear();
-
     currentCSVCollege = filePath;
 
     QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly))
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream in(&file);
         int row = 0;
+
+        QStringList allLines;
         while (!in.atEnd())
         {
-            QString value = in.readLine();
-            QStringList rLine = value.split(',');
+            QString value = in.readLine().trimmed();
+            if (!value.isEmpty())
+                allLines.append(value);
+        }
+
+        // Skip the first line (header)
+        if (!allLines.isEmpty())
+        {
+            allLines.removeFirst();
+        }
+
+        for (const QString &line : allLines)
+        {
+            QStringList rLine = line.split(',');
 
             collegeModel->appendRow({});
 
@@ -178,39 +190,42 @@ void MainWindow::loadCSVCollege(const QString &filePath)
             {
                 QString value = rLine.at(i);
                 QStandardItem *item = new QStandardItem(value);
-
                 item->setFlags(item->flags() & ~Qt::ItemIsEditable);
 
                 collegeModel->setItem(row, i, item);
             }
             row++;
         }
+
         file.close();
     }
+
     collegeModel->setHorizontalHeaderLabels({"College Name", "College Code"});
 }
 
-void MainWindow::on_Add_clicked()
+
+void MainWindow::on_AddStudent_clicked()
 {
-    if (ui->LastName->text().isEmpty() ||
-        ui->FirstName->text().isEmpty() ||
-        ui->IDline->text().isEmpty() ||
+    // Validate required fields
+    if (ui->Lastnameline->text().trimmed().isEmpty() ||
+        ui->Firstnameline->text().trimmed().isEmpty() ||
+        ui->IDline->text().trimmed().isEmpty() ||
         ui->Yearlevelline->currentText().toInt() == 0)
     {
-        QMessageBox::critical(this, "Validation Error", "Please fill out all required fields.");
+        QMessageBox::critical(this, "Validation Error", "Please fill out all required fields (Last Name, First Name, ID, Year Level).");
         return;
     }
 
+    // Extract values
     QString Las = ui->Lastnameline->text().trimmed();
     QString Fir = ui->Firstnameline->text().trimmed();
-    QString Mid = ui->Middlenameline->text().trimmed();
+    QString Mid = ui->Middlenameline->text().trimmed(); // Middle name can be empty
     QString ID = ui->IDline->text().trimmed();
     QString Gen = ui->Genderline->currentText();
     int year = ui->Yearlevelline->currentText().toInt();
     QString Cou = ui->CourseComboBox->currentText();
 
-    qDebug() << "Checking ID format: " << ID;  // Debugging
-
+    // Validate ID format (YYYY-NNNN)
     static const QRegularExpression idRegex(R"(^\d{4}-\d{4}$)");
     if (!idRegex.match(ID).hasMatch())
     {
@@ -218,7 +233,7 @@ void MainWindow::on_Add_clicked()
         return;
     }
 
-    const QString studentsFilePath = "C://Users/Kristelle//Documents//BSCS-3/CCC151 - Database Management//CSV Project/CSV1//Student.csv";
+    const QString studentsFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv";
 
     QFile studentsFile(studentsFilePath);
     if (!studentsFile.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -229,14 +244,14 @@ void MainWindow::on_Add_clicked()
 
     QTextStream in(&studentsFile);
     QStringList csvData;
-    bool idExists = false;
+    bool idExists = false;  // Set to false initially
 
     while (!in.atEnd())
     {
         QString line = in.readLine();
         QStringList parts = line.split(',');
 
-        if (parts.size() >= 4 && parts[3].trimmed() == ID)
+        if (!parts.isEmpty() && parts[0].trimmed() == ID) // ID is in column 0
         {
             idExists = true;
             break;
@@ -251,9 +266,10 @@ void MainWindow::on_Add_clicked()
         return;
     }
 
-    QString newData = ID + "," + Las + "," + Fir + "," + Gen + "," +  Mid + "," + QString::number(year) + "," + Cou;
-    csvData.append(newData);
+    // Format new student data correctly
+    QString newData = ID + "," + Las + "," + Fir + "," + Mid + "," + QString::number(year) + "," + Gen + "," + Cou;
 
+    // Open file in append mode
     if (!studentsFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
     {
         QMessageBox::critical(this, "Error", "Unable to open the students CSV file for writing.");
@@ -271,6 +287,7 @@ void MainWindow::on_Add_clicked()
 
     QMessageBox::information(this, "Success", "Student added successfully!");
 
+    // Clear input fields
     ui->Lastnameline->clear();
     ui->Firstnameline->clear();
     ui->Middlenameline->clear();
@@ -280,10 +297,9 @@ void MainWindow::on_Add_clicked()
     ui->CourseComboBox->setCurrentIndex(0);
 }
 
-void MainWindow::sortStudents()
+void MainWindow::on_EditStudent_clicked()
 {
-    int column = ui->Sort->currentData().toInt(); // Get column from combo box
-    studentProxyModel->sort(column, Qt::AscendingOrder);
+
 }
 
 void MainWindow::on_tabWidget_currentChanged()
@@ -300,3 +316,8 @@ void MainWindow::on_Edit_clicked() //search
 {
 
 }
+
+
+
+
+

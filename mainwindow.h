@@ -30,10 +30,10 @@ public:
 private slots:
     void on_tabWidget_currentChanged();
     void on_Search_clicked();
-    void on_Add_clicked();
-
     void on_Edit_clicked();
-    void sortStudents();
+    void on_AddStudent_clicked();
+
+    void on_EditStudent_clicked();
 
 private:
     Ui::MainWindow *ui;
