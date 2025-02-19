@@ -61,12 +61,12 @@
     </property>
     <item>
      <property name="text">
-      <string>Male</string>
+      <string>Female</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Female</string>
+      <string>Male</string>
      </property>
     </item>
    </widget>
@@ -550,7 +550,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -684,7 +684,7 @@ QPushButton:hover {
      <set>Qt::AlignmentFlag::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLineEdit" name="CollegeName">
+   <widget class="QLineEdit" name="CollegeNameLine">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -699,7 +699,7 @@ QPushButton:hover {
      <rect>
       <x>40</x>
       <y>440</y>
-      <width>181</width>
+      <width>191</width>
       <height>26</height>
      </rect>
     </property>
@@ -709,17 +709,7 @@ QPushButton:hover {
      <rect>
       <x>40</x>
       <y>490</y>
-      <width>181</width>
-      <height>26</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="CollegeCodeProg">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>540</y>
-      <width>181</width>
+      <width>191</width>
       <height>26</height>
      </rect>
     </property>
@@ -824,7 +814,7 @@ QPushButton:hover {
      <string>College Name</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="AddProg">
+   <widget class="QPushButton" name="AddProgram_2">
     <property name="geometry">
      <rect>
       <x>140</x>
@@ -932,7 +922,7 @@ QPushButton:hover {
      <string>Edit</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Edit_3">
+   <widget class="QPushButton" name="EditCollege">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -968,7 +958,7 @@ QPushButton:hover {
      <string>Edit</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Save_2">
+   <widget class="QPushButton" name="SaveCollege">
     <property name="geometry">
      <rect>
       <x>350</x>
@@ -991,7 +981,7 @@ QPushButton:hover {
    <widget class="QPushButton" name="SaveProg">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>150</x>
       <y>610</y>
       <width>81</width>
       <height>21</height>
@@ -1008,7 +998,7 @@ QPushButton:hover {
      <string>Save</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
+   <widget class="QComboBox" name="DeleteProgramCombobox">
     <property name="geometry">
      <rect>
       <x>40</x>
@@ -1038,7 +1028,7 @@ QPushButton:hover {
      <string>Delete Program</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox_3">
+   <widget class="QComboBox" name="DeleteCollegeComboBox">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -1068,7 +1058,7 @@ QPushButton:hover {
      <string>Delete College</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="CollegeCodeCol">
+   <widget class="QLineEdit" name="CollegeCodeLine">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -1078,7 +1068,7 @@ QPushButton:hover {
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="SaveProg_2">
+   <widget class="QPushButton" name="DeleteProgram">
     <property name="geometry">
      <rect>
       <x>140</x>
@@ -1098,7 +1088,7 @@ QPushButton:hover {
      <string>Delete</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="SaveProg_3">
+   <widget class="QPushButton" name="DeleteCollege">
     <property name="geometry">
      <rect>
       <x>350</x>
@@ -1116,6 +1106,16 @@ QPushButton:hover {
     </property>
     <property name="text">
      <string>Delete</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="CollegeCodeCombbox">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>540</y>
+      <width>131</width>
+      <height>26</height>
+     </rect>
     </property>
    </widget>
   </widget>
