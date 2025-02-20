@@ -180,7 +180,6 @@ void MainWindow::loadCSVCollege(const QString &filePath)
             {
                 // Populate the CollegeCodeCombbox with college codes
                 ui->CollegeCodeCombbox->addItem(rLine.at(0));  // Add college code to combo box (index 0)
-                ui->DeleteCollegeComboBox->addItem(rLine.at(1));
             }
 
             // Populate the collegeModel with the data (for displaying in a table or list)
@@ -330,6 +329,63 @@ void MainWindow::on_EditStudent_clicked()
     // Set a flag to indicate that the user is in edit mode
     isEditing = true;
     currentEditingRow = row;
+}
+
+void MainWindow::on_DeleteStudent_clicked()
+{
+    QModelIndex currentIndex = ui->StudentTable->currentIndex(); // Get selected student row
+    if (!currentIndex.isValid()) {
+        QMessageBox::warning(this, "Selection Error", "Please select a student to delete.");
+        return;
+    }
+
+    int row = currentIndex.row();
+    QString studentID = ui->StudentTable->model()->index(row, 0).data().toString().trimmed(); // Assuming student ID is in column 0
+
+    if (studentID.isEmpty()) {
+        QMessageBox::warning(this, "Selection Error", "Student ID not found for the selected row.");
+        return;
+    }
+
+    if (QMessageBox::question(this, "Confirm Deletion",
+        QString("Are you sure you want to delete the student with ID '%1'?").arg(studentID),
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+        return;
+    }
+
+    const QString studentFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv";
+
+    // Step: Delete student from Student.csv
+    QFile studentFile(studentFilePath);
+    if (!studentFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the student file.");
+        return;
+    }
+
+    QStringList updatedStudentData;
+    QTextStream studentIn(&studentFile);
+    while (!studentIn.atEnd()) {
+        QString line = studentIn.readLine();
+        QStringList parts = line.split(',');
+
+        if (!parts.isEmpty() && parts[0].trimmed() != studentID) {
+            updatedStudentData.append(line);
+        }
+    }
+    studentFile.close();
+
+    if (!studentFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the student file.");
+        return;
+    }
+
+    QTextStream studentOut(&studentFile);
+    for (const QString &line : updatedStudentData)
+        studentOut << line << "\n";
+    studentFile.close();
+
+    loadCSVStudents(studentFilePath);
+    QMessageBox::information(this, "Success", "Student deleted successfully.");
 }
 
 void MainWindow::on_SaveStudent_clicked()
@@ -486,6 +542,98 @@ void MainWindow::on_EditCollege_clicked()
     // Set a flag to indicate that you are editing
     isEditing = true;
     currentEditingRow = selectedIndex.row();  // Store the index of the selected row
+}
+
+void MainWindow::on_DeleteProgram_clicked()
+{
+    QModelIndex currentIndex = ui->ProgTable->currentIndex(); // Get selected program row
+    if (!currentIndex.isValid()) {
+        QMessageBox::warning(this, "Selection Error", "Please select a program to delete.");
+        return;
+    }
+
+    int row = currentIndex.row();
+    QString selectedProgramCode = ui->ProgTable->model()->index(row, 0).data().toString().trimmed(); // Program code in column 0
+
+    if (selectedProgramCode.isEmpty()) {
+        QMessageBox::warning(this, "Selection Error", "Program code not found for the selected row.");
+        return;
+    }
+
+    if (QMessageBox::question(this, "Confirm Deletion",
+        QString("Are you sure you want to delete the program '%1'? All related students will be updated to 'Unenrolled'.").arg(selectedProgramCode),
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+        return;
+    }
+
+    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
+    const QString studentFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv";
+
+    // Step 1: Delete the program from Program.csv
+    QFile programFile(programFilePath);
+    if (!programFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the program file.");
+        return;
+    }
+
+    QStringList updatedProgramData;
+    QTextStream programIn(&programFile);
+    while (!programIn.atEnd()) {
+        QString line = programIn.readLine();
+        QStringList parts = line.split(',');
+
+        // Keep all programs except the one being deleted
+        if (!parts.isEmpty() && parts[0].trimmed() != selectedProgramCode) {
+            updatedProgramData.append(line);
+        }
+    }
+    programFile.close();
+
+    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the program file.");
+        return;
+    }
+
+    QTextStream programOut(&programFile);
+    for (const QString &line : updatedProgramData)
+        programOut << line << "\n";
+    programFile.close();
+    loadCSVProgram(programFilePath); // Refresh program data
+
+    // Step 2: Update students under the deleted program to "Unenrolled"
+    QFile studentFile(studentFilePath);
+    if (!studentFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the student file.");
+        return;
+    }
+
+    QStringList updatedStudentData;
+    QTextStream studentIn(&studentFile);
+    while (!studentIn.atEnd()) {
+        QString line = studentIn.readLine();
+        QStringList parts = line.split(',');
+
+        // Update course to "Unenrolled" if it matches the deleted program
+        if (parts.size() >= 7 && parts[6].trimmed() == selectedProgramCode) {
+            parts[6] = "Unenrolled";
+            line = parts.join(",");
+        }
+        updatedStudentData.append(line);
+    }
+    studentFile.close();
+
+    if (!studentFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the student file.");
+        return;
+    }
+
+    QTextStream studentOut(&studentFile);
+    for (const QString &line : updatedStudentData)
+        studentOut << line << "\n";
+    studentFile.close();
+    loadCSVStudents(studentFilePath); // Refresh student data
+
+    QMessageBox::information(this, "Success", "Program deleted and related students updated to 'Unenrolled' successfully.");
 }
 
 void MainWindow::on_SaveCollege_clicked()
@@ -651,8 +799,92 @@ void MainWindow::on_EditProg_clicked()
 
 void MainWindow::on_DeleteCollege_clicked()
 {
+    QModelIndex currentIndex = ui->CollegeTable->currentIndex(); // Get selected college row
+    if (!currentIndex.isValid()) {
+        QMessageBox::warning(this, "Selection Error", "Please select a college to delete.");
+        return;
+    }
 
+    int row = currentIndex.row();
+    QString selectedCollegeCode = ui->CollegeTable->model()->index(row, 0).data().toString().trimmed(); // College code in column 0
+
+    if (selectedCollegeCode.isEmpty()) {
+        QMessageBox::warning(this, "Selection Error", "College code not found for the selected row.");
+        return;
+    }
+
+    if (QMessageBox::question(this, "Confirm Deletion",
+        QString("Are you sure you want to delete the college '%1'? All related programs will be updated to 'N/A'.").arg(selectedCollegeCode),
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+        return;
+    }
+
+    const QString collegeFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv";
+    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
+
+    QFile collegeFile(collegeFilePath);
+    if (!collegeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the college file.");
+        return;
+    }
+
+    QStringList updatedCollegeData;
+    QTextStream collegeIn(&collegeFile);
+    while (!collegeIn.atEnd()) {
+        QString line = collegeIn.readLine();
+        QStringList parts = line.split(',');
+
+        if (!parts.isEmpty() && parts[0].trimmed() != selectedCollegeCode) {
+            updatedCollegeData.append(line);
+        }
+    }
+    collegeFile.close();
+
+    if (!collegeFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the college file.");
+        return;
+    }
+
+    QTextStream collegeOut(&collegeFile);
+    for (const QString &line : updatedCollegeData)
+        collegeOut << line << "\n";
+    collegeFile.close();
+    loadCSVCollege(collegeFilePath); // Refresh college data
+
+    QFile programFile(programFilePath);
+    if (!programFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the program file.");
+        return;
+    }
+
+    QStringList updatedProgramData;
+    QTextStream programIn(&programFile);
+    while (!programIn.atEnd()) {
+        QString line = programIn.readLine();
+        QStringList parts = line.split(',');
+
+        if (parts.size() >= 3 && parts[2].trimmed() == selectedCollegeCode) {
+            parts[2] = "N/A";  // Set college code to N/A for matching programs
+            line = parts.join(",");
+        }
+        updatedProgramData.append(line);
+    }
+    programFile.close();
+
+    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the program file.");
+        return;
+    }
+
+    QTextStream programOut(&programFile);
+    for (const QString &line : updatedProgramData)
+        programOut << line << "\n";
+    programFile.close();
+    loadCSVProgram(programFilePath); // Refresh program data
+
+    QMessageBox::information(this, "Success", "College deleted and related programs updated to 'N/A' successfully.");
 }
+
 void MainWindow::on_SaveProg_clicked()
 {
     if (!isEditing) {
@@ -748,6 +980,10 @@ void MainWindow::on_tabWidget_currentChanged()
 {
 
 }
+
+
+
+
 
 
 

@@ -46,6 +46,8 @@ private slots:
     void updateProgramCSV();
 
     void on_DeleteCollege_clicked();
+    void on_DeleteProgram_clicked();
+    void on_DeleteStudent_clicked();
 
 private:
     Ui::MainWindow *ui;
