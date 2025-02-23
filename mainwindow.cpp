@@ -29,11 +29,14 @@ MainWindow::MainWindow(QWidget *parent)
     loadCSVCollege("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv");
 
     ui->StudentTable->setModel(studentModel);
-    //ui->StudentTable->resizeColumnsToContents();
     ui->ProgTable->setModel(programModel);
     ui->ProgTable->resizeColumnsToContents();
     ui->CollegeTable->setModel(collegeModel);
     ui->CollegeTable->resizeColumnsToContents();
+    ui -> CourseComboBox -> setCurrentIndex(-1);
+    ui -> Genderline -> setCurrentIndex(-1);
+    ui -> Yearlevelline -> setCurrentIndex(-1);
+    ui -> CollegeCodeCombbox -> setCurrentIndex(-1);
 
     studentModel->setHorizontalHeaderLabels({"I.D. Number", "Last Name", "First Name", "Middle Name", "Year Level", "Gender", "Course Code"});
     programModel->setHorizontalHeaderLabels({"Program", "Program Name", "College Code"});
@@ -47,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->ProgTable->setSortingEnabled(true);
 
     // Enable column headers sorting directly
-    ui->StudentTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder); // Default sorting by the first column
+    ui->StudentTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
     ui->ProgTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 }
 
@@ -58,7 +61,6 @@ MainWindow::~MainWindow()
     delete studentModel;
     delete programModel;
     delete collegeModel;
-
 }
 
 void MainWindow::loadCSVStudents(const QString &filePath)
@@ -124,14 +126,14 @@ void MainWindow::loadCSVProgram(const QString &filePath)
 
         while (!in.atEnd())
         {
-            QString value = in.readLine().trimmed(); // Trim any extra spaces or newlines
+            QString value = in.readLine().trimmed();
 
             if (value.isEmpty()) // Ignore empty lines
                 continue;
 
             QStringList rLine = value.split(',');
 
-            if (rLine.size() > 1) // Assuming the first column contains course name
+            if (rLine.size() > 1)
             {
                 ui->CourseComboBox->addItem(rLine.at(0)); // Add course to ComboBox
             }
@@ -154,14 +156,14 @@ void MainWindow::loadCSVProgram(const QString &filePath)
 
 void MainWindow::loadCSVCollege(const QString &filePath)
 {
-    collegeModel->clear();  // Clear any existing data in the model
-    ui->CollegeCodeCombbox->clear();  // Clear the combo box
-    currentCSVCollege = filePath;  // Store the current CSV file path
+    collegeModel->clear();
+    ui->CollegeCodeCombbox->clear();
+    currentCSVCollege = filePath;
 
-    QFile file(filePath);  // Open the file
+    QFile file(filePath);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QTextStream in(&file);  // Read the file content
+        QTextStream in(&file);
         int row = 0;
 
         if (!in.atEnd()) // Skip the first line (header)
@@ -169,36 +171,33 @@ void MainWindow::loadCSVCollege(const QString &filePath)
 
         while (!in.atEnd())  // Read until the end of the file
         {
-            QString value = in.readLine().trimmed();  // Read and trim each line
+            QString value = in.readLine().trimmed();
 
             if (value.isEmpty())  // Ignore empty lines
                 continue;
 
-            QStringList rLine = value.split(',');  // Split the line into columns
+            QStringList rLine = value.split(',');
 
-            if (rLine.size() > 1)  // Assuming the first column contains college code and second contains college name
+            if (rLine.size() > 1)  // first column contains college code and second contains college name
             {
-                // Populate the CollegeCodeCombbox with college codes
                 ui->CollegeCodeCombbox->addItem(rLine.at(0));  // Add college code to combo box (index 0)
             }
 
-            // Populate the collegeModel with the data (for displaying in a table or list)
-            collegeModel->appendRow({});
+            collegeModel->appendRow({}); // Populate the collegeModel with the data
 
             for (int i = 0; i < rLine.size(); i++)
             {
                 QString value = rLine.at(i);
-                QStandardItem *item = new QStandardItem(value);  // Create a new item for each column
+                QStandardItem *item = new QStandardItem(value);
                 item->setFlags(item->flags() & ~Qt::ItemIsEditable);  // Make the item non-editable
-                collegeModel->setItem(row, i, item);  // Set the item in the model
+                collegeModel->setItem(row, i, item);
             }
             row++;  // Increment the row counter
         }
 
-        file.close();  // Close the file after reading
+        file.close();
     }
 
-    // Set the horizontal headers for the college model (College Code first, then College Name)
     collegeModel->setHorizontalHeaderLabels({"College Code", "College Name"});
 }
 
@@ -206,7 +205,6 @@ void MainWindow::loadCSVCollege(const QString &filePath)
 
 void MainWindow::on_AddStudent_clicked()
 {
-    // Validate required fields
     if (ui->Lastnameline->text().trimmed().isEmpty() ||
         ui->Firstnameline->text().trimmed().isEmpty() ||
         ui->IDline->text().trimmed().isEmpty() ||
@@ -216,7 +214,6 @@ void MainWindow::on_AddStudent_clicked()
         return;
     }
 
-    // Extract values
     QString Las = ui->Lastnameline->text().trimmed();
     QString Fir = ui->Firstnameline->text().trimmed();
     QString Mid = ui->Middlenameline->text().trimmed(); // Middle name can be empty
@@ -244,7 +241,7 @@ void MainWindow::on_AddStudent_clicked()
 
     QTextStream in(&studentsFile);
     QStringList csvData;
-    bool idExists = false;  // Set to false initially
+    bool idExists = false;
 
     while (!in.atEnd())
     {
@@ -266,10 +263,8 @@ void MainWindow::on_AddStudent_clicked()
         return;
     }
 
-    // Format new student data correctly
     QString newStudentData = ID + "," + Las + "," + Fir + "," + Mid + "," + QString::number(year) + "," + Gen + "," + Cou;
 
-    // Open file in append mode
     if (!studentsFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
     {
         QMessageBox::critical(this, "Error", "Unable to open the students CSV file for writing.");
@@ -300,7 +295,6 @@ void MainWindow::on_AddStudent_clicked()
 void MainWindow::on_EditStudent_clicked()
 {
     QModelIndex currentIndex = ui->StudentTable->currentIndex(); // Get selected row
-
     if (!currentIndex.isValid()) {
         QMessageBox::warning(this, "Selection Error", "Please select a student to edit.");
         return;
@@ -319,6 +313,7 @@ void MainWindow::on_EditStudent_clicked()
 
     // Populate the input fields for editing
     ui->IDline->setText(ID);
+    ui->IDline->setReadOnly(true);
     ui->Lastnameline->setText(lastName);
     ui->Firstnameline->setText(firstName);
     ui->Middlenameline->setText(middleName);
@@ -326,9 +321,65 @@ void MainWindow::on_EditStudent_clicked()
     ui->Genderline->setCurrentText(gender);
     ui->CourseComboBox->setCurrentText(course);
 
-    // Set a flag to indicate that the user is in edit mode
+    // Set to edit mode
     isEditing = true;
     currentEditingRow = row;
+}
+
+void MainWindow::on_SaveStudent_clicked()
+{
+    if (!isEditing) {
+        QMessageBox::warning(this, "No Edit", "Please select a student to edit first.");
+        return;
+    }
+    // Get the updated values from the input fields
+    QString updatedID = ui->IDline->text().trimmed();
+    QString updatedLastName = ui->Lastnameline->text().trimmed();
+    QString updatedFirstName = ui->Firstnameline->text().trimmed();
+    QString updatedMiddleName = ui->Middlenameline->text().trimmed();
+    QString updatedYearLevel = ui->Yearlevelline->currentText().trimmed();
+    QString updatedGender = ui->Genderline->currentText().trimmed();
+    QString updatedCourse = ui->CourseComboBox->currentText().trimmed();
+
+    // Validate input
+    if (updatedID.isEmpty() || updatedLastName.isEmpty() || updatedFirstName.isEmpty()) {
+        QMessageBox::warning(this, "Input Error", "Please fill all required fields.");
+        return;
+    }
+    // Update the model with new data
+    studentModel->setItem(currentEditingRow, 0, new QStandardItem(updatedID));
+    studentModel->setItem(currentEditingRow, 1, new QStandardItem(updatedLastName));
+    studentModel->setItem(currentEditingRow, 2, new QStandardItem(updatedFirstName));
+    studentModel->setItem(currentEditingRow, 3, new QStandardItem(updatedMiddleName));
+    studentModel->setItem(currentEditingRow, 4, new QStandardItem(updatedYearLevel));
+    studentModel->setItem(currentEditingRow, 5, new QStandardItem(updatedGender));
+    studentModel->setItem(currentEditingRow, 6, new QStandardItem(updatedCourse));
+
+    updateStudentCSV();
+    QMessageBox::information(this, "Success", "Student information updated successfully.");
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+void MainWindow::updateStudentCSV()
+{
+    QFile file(currentCSVStudent);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::warning(this, "Error", "Could not save student data.");
+        return;
+    }
+
+    QTextStream out(&file);
+    for (int row = 0; row < studentModel->rowCount(); ++row) {
+        QStringList rowData;
+        for (int col = 0; col < studentModel->columnCount(); ++col) {
+            rowData.append(studentModel->item(row, col)->text());
+        }
+        out << rowData.join(",") << "\n";
+    }
+
+    file.close();
 }
 
 void MainWindow::on_DeleteStudent_clicked()
@@ -355,7 +406,7 @@ void MainWindow::on_DeleteStudent_clicked()
 
     const QString studentFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv";
 
-    // Step: Delete student from Student.csv
+    // Delete student from Student.csv
     QFile studentFile(studentFilePath);
     if (!studentFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", "Unable to open the student file.");
@@ -386,78 +437,291 @@ void MainWindow::on_DeleteStudent_clicked()
 
     loadCSVStudents(studentFilePath);
     QMessageBox::information(this, "Success", "Student deleted successfully.");
+    clearStudentInputFields();
 }
 
-void MainWindow::on_SaveStudent_clicked()
+//Clear
+void MainWindow::clearStudentInputFields()
 {
-    if (!isEditing) {
-        QMessageBox::warning(this, "No Edit", "Please select a student to edit first.");
+    ui->IDline->clear();
+    ui->IDline->setReadOnly(true);
+    ui->Lastnameline->clear();
+    ui->Firstnameline->clear();
+    ui->Middlenameline->clear();
+    ui->Yearlevelline->setCurrentIndex(-1);
+    ui->Genderline->setCurrentIndex(-1);
+    ui->CourseComboBox->setCurrentIndex(-1);
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+void MainWindow::clearProgramInputFields(){
+    ui->ProgramCode_2->clear();
+    ui->ProgramName_2->clear();
+    ui->CollegeCodeCombbox->setCurrentIndex(-1);
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+void MainWindow::clearCollegeInputFields()
+{
+    ui->CollegeCodeLine->clear();
+    ui->CollegeNameLine->clear();
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+//Add program
+void MainWindow::on_AddProgram_2_clicked()
+{
+    if (ui->ProgramCode_2->text().trimmed().isEmpty() ||
+        ui->ProgramName_2->text().trimmed().isEmpty() ||
+        ui->CollegeCodeCombbox->currentIndex() == -1)  // College Code must be selected
+    {
+        QMessageBox::critical(this, "Validation Error", "Please fill out all required fields (Program Code, Program Name, College Code).");
+        return;
+    }
+    QString programCode = ui->ProgramCode_2->text().trimmed();
+    QString programName = ui->ProgramName_2->text().trimmed();
+    QString collegeCode = ui->CollegeCodeCombbox->currentText().trimmed();
+
+    // Validate Program Code format (alphanumeric)
+    static const QRegularExpression codeRegex(R"(^[A-Za-z0-9]+$)");
+    if (!codeRegex.match(programCode).hasMatch())
+    {
+        QMessageBox::critical(this, "Program Code Format Error", "Please enter a valid Program Code (alphanumeric only).");
+        return;
+    }
+    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
+    QFile programFile(programFilePath);
+
+    if (!programFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::critical(this, "Error", "Unable to open the program file.");
+        return;
+    }
+    QTextStream programIn(&programFile);
+    bool programCodeExists = false;
+
+    while (!programIn.atEnd())
+    {
+        QString line = programIn.readLine();
+        QStringList parts = line.split(',');
+
+        if (!parts.isEmpty() && parts[0].trimmed() == programCode)
+        {
+            programCodeExists = true;
+            break;
+        }
+    }
+    programFile.close();
+
+    if (programCodeExists)
+    {
+        QMessageBox::critical(this, "Duplicate Program Code Error", "The specified Program Code already exists.");
         return;
     }
 
-    // Get the updated values from the input fields
-    QString updatedID = ui->IDline->text().trimmed();
-    QString updatedLastName = ui->Lastnameline->text().trimmed();
-    QString updatedFirstName = ui->Firstnameline->text().trimmed();
-    QString updatedMiddleName = ui->Middlenameline->text().trimmed();
-    QString updatedYearLevel = ui->Yearlevelline->currentText().trimmed();
-    QString updatedGender = ui->Genderline->currentText().trimmed();
-    QString updatedCourse = ui->CourseComboBox->currentText().trimmed();
+    QString newProgramData = programCode + "," + programName + "," + collegeCode;
 
-    // Validate input
-    if (updatedID.isEmpty() || updatedLastName.isEmpty() || updatedFirstName.isEmpty()) {
+    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
+    {
+        QMessageBox::critical(this, "Error", "Unable to open the program file for writing.");
+        return;
+    }
+
+    QTextStream out(&programFile);
+    out << newProgramData << "\n";  // Append only new data
+    programFile.close();
+
+    loadCSVProgram(programFilePath);
+
+    ui->ProgTable->setModel(programModel);
+    ui->ProgTable->resizeColumnsToContents();
+
+
+    QMessageBox::information(this, "Success", "Program added successfully!");
+
+    ui->ProgramCode_2->clear();
+    ui->ProgramName_2->clear();
+    ui->CollegeCodeCombbox->setCurrentIndex(-1);
+
+}
+
+void MainWindow::on_EditProg_clicked() {
+    QModelIndex selectIndex = ui->ProgTable->currentIndex();
+
+    if (!selectIndex.isValid()) {
+        QMessageBox::warning(this, "Selection Error", "Please select a Program to edit.");
+        return;
+    }
+
+    QString oldProgramCode = ui->ProgTable->model()->data(ui->ProgTable->model()->index(selectIndex.row(), 0)).toString().trimmed();
+    ui->ProgramCode_2->setText(oldProgramCode);
+    ui->ProgramName_2->setText(ui->ProgTable->model()->data(ui->ProgTable->model()->index(selectIndex.row(), 1)).toString());
+    ui->CollegeCodeCombbox->setCurrentText(ui->ProgTable->model()->data(ui->ProgTable->model()->index(selectIndex.row(), 2)).toString());
+
+    isEditing = true;
+    currentEditingRow = selectIndex.row();
+}
+
+void MainWindow::on_SaveProg_clicked() {
+    if (!isEditing) {
+        QMessageBox::warning(this, "No Edit", "Please select a program to edit first.");
+        return;
+    }
+    QString updatedProgramCode = ui->ProgramCode_2->text().trimmed();
+    QString updatedProgramName = ui->ProgramName_2->text().trimmed();
+    QString updatedCollegeCode = ui->CollegeCodeCombbox->currentText().trimmed();
+
+    if (updatedProgramCode.isEmpty() || updatedProgramName.isEmpty() || updatedCollegeCode.isEmpty()) {
         QMessageBox::warning(this, "Input Error", "Please fill all required fields.");
         return;
     }
 
-    // Update the model with new data
-    studentModel->setItem(currentEditingRow, 0, new QStandardItem(updatedID));
-    studentModel->setItem(currentEditingRow, 1, new QStandardItem(updatedLastName));
-    studentModel->setItem(currentEditingRow, 2, new QStandardItem(updatedFirstName));
-    studentModel->setItem(currentEditingRow, 3, new QStandardItem(updatedMiddleName));
-    studentModel->setItem(currentEditingRow, 4, new QStandardItem(updatedYearLevel));
-    studentModel->setItem(currentEditingRow, 5, new QStandardItem(updatedGender));
-    studentModel->setItem(currentEditingRow, 6, new QStandardItem(updatedCourse));
+    QString oldProgramCode = programModel->item(currentEditingRow, 0)->text().trimmed();
 
-    // Update the CSV file with the new data
+    programModel->setItem(currentEditingRow, 0, new QStandardItem(updatedProgramCode));
+    programModel->setItem(currentEditingRow, 1, new QStandardItem(updatedProgramName));
+    programModel->setItem(currentEditingRow, 2, new QStandardItem(updatedCollegeCode));
+
+    updateProgramCSV();
+
+    // Update student CSV with the new program code if it matches the old program code
+    for (int row = 0; row < studentModel->rowCount(); ++row) {
+        if (studentModel->item(row, 6)->text().trimmed() == oldProgramCode) {
+            studentModel->setItem(row, 6, new QStandardItem(updatedProgramCode));
+        }
+    }
     updateStudentCSV();
 
-    // Notify user of success
-    QMessageBox::information(this, "Success", "Student information updated successfully.");
+    QMessageBox::information(this, "Success", "Program and related student records updated successfully.");
 
-    // Reset editing state
     isEditing = false;
-    currentEditingRow = -1;  // Reset to no editing row
+    currentEditingRow = -1;
 }
 
-void MainWindow::updateStudentCSV()
+void MainWindow::on_DeleteProgram_clicked()
 {
-    qDebug() << "Updating CSV file...";
-
-    QFile file(currentCSVStudent);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, "Error", "Could not save student data.");
+    QModelIndex currentIndex = ui->ProgTable->currentIndex(); // Get selected program row
+    if (!currentIndex.isValid()) {
+        QMessageBox::warning(this, "Selection Error", "Please select a program to delete.");
         return;
     }
 
-    QTextStream out(&file);
+    int row = currentIndex.row();
+    QString selectedProgramCode = ui->ProgTable->model()->index(row, 0).data().toString().trimmed(); // Program code in column 0
 
-    // Write headers (optional)
-    out << "ID,Last Name,First Name,Middle Name,Year Level,Gender,Course\n";
+    if (selectedProgramCode.isEmpty()) {
+        QMessageBox::warning(this, "Selection Error", "Program code not found for the selected row.");
+        return;
+    }
 
-    for (int row = 0; row < studentModel->rowCount(); ++row) {
+    if (QMessageBox::question(this, "Confirm Deletion",
+        QString("Are you sure you want to delete the program '%1'? All related students will be updated to 'Unenrolled'.").arg(selectedProgramCode),
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+        return;
+    }
+
+    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
+    const QString studentFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv";
+
+    // Delete the program from Program.csv
+    QFile programFile(programFilePath);
+    if (!programFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the program file.");
+        return;
+    }
+
+    QStringList updatedProgramData;
+    QTextStream programIn(&programFile);
+    while (!programIn.atEnd()) {
+        QString line = programIn.readLine();
+        QStringList parts = line.split(',');
+
+        if (!parts.isEmpty() && parts[0].trimmed() != selectedProgramCode) {
+            updatedProgramData.append(line);
+        }
+    }
+    programFile.close();
+
+    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the program file.");
+        return;
+    }
+
+    QTextStream programOut(&programFile);
+    for (const QString &line : updatedProgramData)
+        programOut << line << "\n";
+    programFile.close();
+    loadCSVProgram(programFilePath); // Refresh program data
+
+    //Update students under the deleted program to "Unenrolled"
+    QFile studentFile(studentFilePath);
+    if (!studentFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the student file.");
+        return;
+    }
+
+    QStringList updatedStudentData;
+    QTextStream studentIn(&studentFile);
+    while (!studentIn.atEnd()) {
+        QString line = studentIn.readLine();
+        QStringList parts = line.split(',');
+
+        // Update course to "Unenrolled" if it matches the deleted program
+        if (parts.size() >= 7 && parts[6].trimmed() == selectedProgramCode) {
+            parts[6] = "Unenrolled";
+            line = parts.join(",");
+        }
+        updatedStudentData.append(line);
+    }
+    studentFile.close();
+
+    if (!studentFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        QMessageBox::critical(this, "Error", "Unable to write to the student file.");
+        return;
+    }
+
+    QTextStream studentOut(&studentFile);
+    for (const QString &line : updatedStudentData)
+        studentOut << line << "\n";
+    studentFile.close();
+    loadCSVStudents(studentFilePath); // Refresh student data
+
+    QMessageBox::information(this, "Success", "Program deleted and related students updated to 'Unenrolled' successfully.");
+    clearProgramInputFields();
+}
+
+void MainWindow::updateProgramCSV()
+{
+    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
+    QFile programFile(programFilePath);
+
+    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the program file for saving.");
+        return;
+    }
+
+    QTextStream out(&programFile);
+
+    for (int row = 0; row < programModel->rowCount(); ++row) {
         QStringList rowData;
-        for (int col = 0; col < studentModel->columnCount(); ++col) {
-            rowData.append(studentModel->item(row, col)->text());
+        for (int col = 0; col < programModel->columnCount(); ++col) {
+            rowData.append(programModel->item(row, col)->text());
         }
         out << rowData.join(",") << "\n";
     }
 
-    file.close();
-    qDebug() << "CSV update complete.";
+    programFile.close();
 }
 
+
 //Add College
+
 void MainWindow::on_AddCollege_2_clicked() {
 
     if (ui->CollegeCodeLine->text().trimmed().isEmpty() ||
@@ -521,280 +785,56 @@ void MainWindow::on_AddCollege_2_clicked() {
     ui->CollegeNameLine->clear();
 }
 
-void MainWindow::on_EditCollege_clicked()
-{
-    QModelIndex selectedIndex = ui->CollegeTable->currentIndex();  // Assuming CollegeTable is your table for displaying colleges.
+void MainWindow::on_EditCollege_clicked() {
+    QModelIndex selectedIndex = ui->CollegeTable->currentIndex();
 
     // Ensure a row is selected
     if (!selectedIndex.isValid()) {
         QMessageBox::warning(this, "Selection Error", "Please select a college to edit.");
         return;
     }
+    // Get the old college code before editing
+    QString oldCollegeCode = ui->CollegeTable->model()->data(ui->CollegeTable->model()->index(selectedIndex.row(), 0)).toString().trimmed();
 
-    // Get the college code and name from the selected row
-    QString collegeCode = ui->CollegeTable->model()->data(ui->CollegeTable->model()->index(selectedIndex.row(), 0)).toString();
-    QString collegeName = ui->CollegeTable->model()->data(ui->CollegeTable->model()->index(selectedIndex.row(), 1)).toString();
+    // Set the data in the input fields for editing
+    ui->CollegeCodeLine->setText(oldCollegeCode);
+    ui->CollegeNameLine->setText(ui->CollegeTable->model()->data(ui->CollegeTable->model()->index(selectedIndex.row(), 1)).toString());
 
-    // Set the data in the input fields
-    ui->CollegeCodeLine->setText(collegeCode);
-    ui->CollegeNameLine->setText(collegeName);
-
-    // Set a flag to indicate that you are editing
     isEditing = true;
-    currentEditingRow = selectedIndex.row();  // Store the index of the selected row
+    currentEditingRow = selectedIndex.row();
 }
 
-void MainWindow::on_DeleteProgram_clicked()
-{
-    QModelIndex currentIndex = ui->ProgTable->currentIndex(); // Get selected program row
-    if (!currentIndex.isValid()) {
-        QMessageBox::warning(this, "Selection Error", "Please select a program to delete.");
-        return;
-    }
-
-    int row = currentIndex.row();
-    QString selectedProgramCode = ui->ProgTable->model()->index(row, 0).data().toString().trimmed(); // Program code in column 0
-
-    if (selectedProgramCode.isEmpty()) {
-        QMessageBox::warning(this, "Selection Error", "Program code not found for the selected row.");
-        return;
-    }
-
-    if (QMessageBox::question(this, "Confirm Deletion",
-        QString("Are you sure you want to delete the program '%1'? All related students will be updated to 'Unenrolled'.").arg(selectedProgramCode),
-        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-        return;
-    }
-
-    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
-    const QString studentFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv";
-
-    // Step 1: Delete the program from Program.csv
-    QFile programFile(programFilePath);
-    if (!programFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Unable to open the program file.");
-        return;
-    }
-
-    QStringList updatedProgramData;
-    QTextStream programIn(&programFile);
-    while (!programIn.atEnd()) {
-        QString line = programIn.readLine();
-        QStringList parts = line.split(',');
-
-        // Keep all programs except the one being deleted
-        if (!parts.isEmpty() && parts[0].trimmed() != selectedProgramCode) {
-            updatedProgramData.append(line);
-        }
-    }
-    programFile.close();
-
-    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QMessageBox::critical(this, "Error", "Unable to write to the program file.");
-        return;
-    }
-
-    QTextStream programOut(&programFile);
-    for (const QString &line : updatedProgramData)
-        programOut << line << "\n";
-    programFile.close();
-    loadCSVProgram(programFilePath); // Refresh program data
-
-    // Step 2: Update students under the deleted program to "Unenrolled"
-    QFile studentFile(studentFilePath);
-    if (!studentFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Unable to open the student file.");
-        return;
-    }
-
-    QStringList updatedStudentData;
-    QTextStream studentIn(&studentFile);
-    while (!studentIn.atEnd()) {
-        QString line = studentIn.readLine();
-        QStringList parts = line.split(',');
-
-        // Update course to "Unenrolled" if it matches the deleted program
-        if (parts.size() >= 7 && parts[6].trimmed() == selectedProgramCode) {
-            parts[6] = "Unenrolled";
-            line = parts.join(",");
-        }
-        updatedStudentData.append(line);
-    }
-    studentFile.close();
-
-    if (!studentFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QMessageBox::critical(this, "Error", "Unable to write to the student file.");
-        return;
-    }
-
-    QTextStream studentOut(&studentFile);
-    for (const QString &line : updatedStudentData)
-        studentOut << line << "\n";
-    studentFile.close();
-    loadCSVStudents(studentFilePath); // Refresh student data
-
-    QMessageBox::information(this, "Success", "Program deleted and related students updated to 'Unenrolled' successfully.");
-}
-
-void MainWindow::on_SaveCollege_clicked()
-{
+void MainWindow::on_SaveCollege_clicked() {
     if (!isEditing) {
         QMessageBox::warning(this, "No Edit", "Please select a college to edit first.");
         return;
     }
-
-    // Get the updated values from the input fields
-    QString updatedCollegeCode = ui->CollegeCodeLine->text().trimmed();
+    QString updatedCollegeCode = ui->CollegeCodeLine->text().trimmed();    // Get updated values from input fields
     QString updatedCollegeName = ui->CollegeNameLine->text().trimmed();
 
-    // Validate the input
     if (updatedCollegeCode.isEmpty() || updatedCollegeName.isEmpty()) {
-        QMessageBox::warning(this, "Input Error", "Please fill all required fields.");
+        QMessageBox::warning(this, "Input Error", "College code and name cannot be empty.");
         return;
     }
-
-    // Update the model with new data
+    QString oldCollegeCode = collegeModel->item(currentEditingRow, 0)->text().trimmed();
+    // Update college data in the model
     collegeModel->setItem(currentEditingRow, 0, new QStandardItem(updatedCollegeCode));
     collegeModel->setItem(currentEditingRow, 1, new QStandardItem(updatedCollegeName));
 
-    // Update the CSV file with the new data
     updateCollegeCSV();
 
-    // Notify user of success
-    QMessageBox::information(this, "Success", "College information updated successfully.");
+    // Update related program college codes if they match the old college code
+    for (int row = 0; row < programModel->rowCount(); ++row) {
+        if (programModel->item(row, 2)->text().trimmed() == oldCollegeCode) {
+            programModel->setItem(row, 2, new QStandardItem(updatedCollegeCode));
+        }
+    }
+    updateProgramCSV(); // Save updated program data
 
-    // Reset editing state
+    QMessageBox::information(this, "Success", "College and related programs updated successfully.");
+
     isEditing = false;
-    currentEditingRow = -1;  // Reset to no editing row
-}
-
-void MainWindow::updateCollegeCSV()
-{
-    const QString collegeFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv";
-    QFile collegeFile(collegeFilePath);
-
-    if (!collegeFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Unable to open the college file for saving.");
-        return;
-    }
-
-    QTextStream out(&collegeFile);
-
-    // Iterate over the rows in the model to collect the data
-    for (int row = 0; row < collegeModel->rowCount(); ++row) {
-        QStringList rowData;
-        for (int col = 0; col < collegeModel->columnCount(); ++col) {
-            rowData.append(collegeModel->item(row, col)->text());
-        }
-        out << rowData.join(",") << "\n";
-    }
-
-    collegeFile.close();
-    qDebug() << "College CSV update complete.";
-}
-
-
-//Add program
-
-void MainWindow::on_AddProgram_2_clicked()
-{
-    if (ui->ProgramCode_2->text().trimmed().isEmpty() ||
-        ui->ProgramName_2->text().trimmed().isEmpty() ||
-        ui->CollegeCodeCombbox->currentIndex() == -1)  // College Code must be selected
-    {
-        QMessageBox::critical(this, "Validation Error", "Please fill out all required fields (Program Code, Program Name, College Code).");
-        return;
-    }
-    QString programCode = ui->ProgramCode_2->text().trimmed();
-    QString programName = ui->ProgramName_2->text().trimmed();
-    QString collegeCode = ui->CollegeCodeCombbox->currentText().trimmed();
-
-    // Validate Program Code format (alphanumeric)
-    static const QRegularExpression codeRegex(R"(^[A-Za-z0-9]+$)");
-    if (!codeRegex.match(programCode).hasMatch())
-    {
-        QMessageBox::critical(this, "Program Code Format Error", "Please enter a valid Program Code (alphanumeric only).");
-        return;
-    }
-    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
-    QFile programFile(programFilePath);
-
-    if (!programFile.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        QMessageBox::critical(this, "Error", "Unable to open the program file.");
-        return;
-    }
-    QTextStream programIn(&programFile);
-    bool programCodeExists = false;
-
-    while (!programIn.atEnd())
-    {
-        QString line = programIn.readLine();
-        QStringList parts = line.split(',');
-
-        if (!parts.isEmpty() && parts[0].trimmed() == programCode)
-        {
-            programCodeExists = true;
-            break;
-        }
-    }
-    programFile.close();
-
-    if (programCodeExists)
-    {
-        QMessageBox::critical(this, "Duplicate Program Code Error", "The specified Program Code already exists.");
-        return;
-    }
-
-    QString newProgramData = programCode + "," + programName + "," + collegeCode;
-
-    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
-    {
-        QMessageBox::critical(this, "Error", "Unable to open the program file for writing.");
-        return;
-    }
-
-
-    QTextStream out(&programFile);
-    out << newProgramData << "\n";  // Append only new data
-    programFile.close();
-
-    loadCSVProgram(programFilePath);
-
-    ui->ProgTable->setModel(programModel);
-    ui->ProgTable->resizeColumnsToContents();
-
-
-    QMessageBox::information(this, "Success", "Program added successfully!");
-
-    ui->ProgramCode_2->clear();
-    ui->ProgramName_2->clear();
-    ui->CollegeCodeCombbox->setCurrentIndex(-1);
-
-}
-
-void MainWindow::on_EditProg_clicked()
-{
-    QModelIndex currentIndex = ui->ProgTable->currentIndex(); // Get selected row
-
-    if (!currentIndex.isValid()) {
-        QMessageBox::warning(this, "Selection Error", "Please select a Program to edit.");
-        return;
-    }
-
-    int row = currentIndex.row(); // Get the row index of the selected student
-
-    QString programCode = programModel->item(row, 0)->text();
-    QString programName = programModel->item(row, 1)->text();
-    QString collegeCode = programModel->item(row, 2)->text();
-
-    ui->ProgramCode_2->setText(programCode);
-    ui->ProgramName_2->setText(programName);
-    ui->CollegeCodeCombbox->setCurrentText(collegeCode);
-
-    isEditing = true;
-    currentEditingRow = row;
-
+    currentEditingRow = -1;
 }
 
 void MainWindow::on_DeleteCollege_clicked()
@@ -883,103 +923,110 @@ void MainWindow::on_DeleteCollege_clicked()
     loadCSVProgram(programFilePath); // Refresh program data
 
     QMessageBox::information(this, "Success", "College deleted and related programs updated to 'N/A' successfully.");
+    clearCollegeInputFields();
 }
 
-void MainWindow::on_SaveProg_clicked()
+void MainWindow::updateCollegeCSV()
 {
-    if (!isEditing) {
-    QMessageBox::warning(this, "No Edit", "Please select a program to edit first.");
-    return;
-    }
+    const QString collegeFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv";
+    QFile collegeFile(collegeFilePath);
 
-    // Get the updated values from the input fields
-    QString updatedProgramCode = ui->ProgramCode_2->text().trimmed();
-    QString updatedProgramName = ui->ProgramName_2->text().trimmed();
-
-    // Validate the input
-    if (updatedProgramCode.isEmpty() || updatedProgramName.isEmpty()) {
-        QMessageBox::warning(this, "Input Error", "Please fill all required fields.");
+    if (!collegeFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Unable to open the college file for saving.");
         return;
     }
 
-    // Update the model with new data
-    programModel->setItem(currentEditingRow, 0, new QStandardItem(updatedProgramCode));
-    programModel->setItem(currentEditingRow, 1, new QStandardItem(updatedProgramName));
+    QTextStream out(&collegeFile);
 
-    // Update the CSV file with the new data
-    updateProgramCSV();
-
-    // Notify user of success
-    QMessageBox::information(this, "Success", "Program information updated successfully.");
-
-    // Reset editing state
-    isEditing = false;
-    currentEditingRow = -1;  // Reset to no editing row*/
-}
-
-void MainWindow::updateProgramCSV()
-{
-    const QString programFilePath = "C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv";
-    QFile programFile(programFilePath);
-
-    if (!programFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Unable to open the program file for saving.");
-        return;
-    }
-
-    QTextStream out(&programFile);
-
-    for (int row = 0; row < programModel->rowCount(); ++row) {
+    // Iterate over the rows in the model to collect the data
+    for (int row = 0; row < collegeModel->rowCount(); ++row) {
         QStringList rowData;
-        for (int col = 0; col < programModel->columnCount(); ++col) {
-            rowData.append(programModel->item(row, col)->text());
+        for (int col = 0; col < collegeModel->columnCount(); ++col) {
+            rowData.append(collegeModel->item(row, col)->text());
         }
         out << rowData.join(",") << "\n";
     }
 
-    programFile.close();
-    qDebug() << "Program CSV update complete.";
+    collegeFile.close();
 }
 
-
+//Search
 void MainWindow::on_Search_clicked()
 {
-    QString searchTerm = ui->SearchLine->text().trimmed(); // Assuming you have a QLineEdit named SearchLineEdit
+    QString searchTerm = ui->SearchLine->text().trimmed();
 
     if (searchTerm.isEmpty()) {
-        QMessageBox::information(this, "Search", "Please enter a search term.");
+        loadCSVStudents("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv");
+        loadCSVProgram("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv");
+        loadCSVCollege("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv");
+
+        ui->StudentTable->setModel(studentModel);
+        ui->StudentTable->resizeColumnsToContents();
+
+        ui->ProgTable->setModel(programModel);
+        ui->ProgTable->resizeColumnsToContents();
+
+        ui->CollegeTable->setModel(collegeModel);
+        ui->CollegeTable->resizeColumnsToContents();
+
+        QMessageBox::information(this, "Search Reset", "All data has been reloaded.");
         return;
     }
 
-    bool found = false;
+    bool studentFound = false;
+    bool programFound = false;
+    bool collegeFound = false;
+
+    // Search Student
     for (int row = 0; row < studentModel->rowCount(); ++row) {
         bool rowMatches = false;
         for (int col = 0; col < studentModel->columnCount(); ++col) {
             QString cellText = studentModel->item(row, col)->text();
             if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
                 rowMatches = true;
-                found = true;
+                studentFound = true;
                 break;
             }
         }
-
-        ui->StudentTable->setRowHidden(row, !rowMatches); // Hide non-matching rows
+        ui->StudentTable->setRowHidden(row, !rowMatches);
     }
 
-    if (!found) {
-        QMessageBox::information(this, "Search", "No matching records found.");
+    // Search Program Table
+    for (int row = 0; row < programModel->rowCount(); ++row) {
+        bool rowMatches = false;
+        for (int col = 0; col < programModel->columnCount(); ++col) {
+            QString cellText = programModel->item(row, col)->text();
+            if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
+                rowMatches = true;
+                programFound = true;
+                break;
+            }
+        }
+        ui->ProgTable->setRowHidden(row, !rowMatches);
+    }
+
+    // Search College Table
+    for (int row = 0; row < collegeModel->rowCount(); ++row) {
+        bool rowMatches = false;
+        for (int col = 0; col < collegeModel->columnCount(); ++col) {
+            QString cellText = collegeModel->item(row, col)->text();
+            if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
+                rowMatches = true;
+                collegeFound = true;
+                break;
+            }
+        }
+        ui->CollegeTable->setRowHidden(row, !rowMatches);
+    }
+
+    if (!studentFound && !programFound && !collegeFound) {
+        QMessageBox::information(this, "Search", "No matching records found in students, programs, or colleges.");
     }
 }
 
 
 
-void MainWindow::on_TabTable_currentChanged(int index){
 
-}
-void MainWindow::on_tabWidget_currentChanged()
-{
-
-}
 
 
 

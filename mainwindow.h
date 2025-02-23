@@ -28,26 +28,30 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_tabWidget_currentChanged();
     void on_Search_clicked();
     void on_AddStudent_clicked();
-    void on_EditStudent_clicked();
-    void on_TabTable_currentChanged(int index);
-    void updateStudentCSV();
+    void on_AddProgram_2_clicked();
     void on_AddCollege_2_clicked();
-    void on_SaveStudent_clicked();
+
+    void clearStudentInputFields();
+    void clearProgramInputFields();
+    void clearCollegeInputFields();
+
+    void on_EditStudent_clicked();
+    void on_EditProg_clicked();
     void on_EditCollege_clicked();
+
+    void on_SaveStudent_clicked();
+    void on_SaveProg_clicked();
     void on_SaveCollege_clicked();
+
+    void updateStudentCSV();
+    void updateProgramCSV();
     void updateCollegeCSV();
 
-    void on_AddProgram_2_clicked();
-    void on_EditProg_clicked();
-    void on_SaveProg_clicked();
-    void updateProgramCSV();
-
-    void on_DeleteCollege_clicked();
-    void on_DeleteProgram_clicked();
     void on_DeleteStudent_clicked();
+    void on_DeleteProgram_clicked();
+    void on_DeleteCollege_clicked();
 
 private:
     Ui::MainWindow *ui;
