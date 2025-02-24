@@ -11,6 +11,7 @@
 #include <QListView>
 #include <QTableView>
 #include <QSortFilterProxyModel>
+#include <QCompleter>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -30,9 +31,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->StudentTable->setModel(studentModel);
     ui->ProgTable->setModel(programModel);
-    ui->ProgTable->resizeColumnsToContents();
     ui->CollegeTable->setModel(collegeModel);
+
+    ui->ProgTable->resizeColumnsToContents();
     ui->CollegeTable->resizeColumnsToContents();
+
     ui -> CourseComboBox -> setCurrentIndex(-1);
     ui -> Genderline -> setCurrentIndex(-1);
     ui -> Yearlevelline -> setCurrentIndex(-1);
@@ -48,10 +51,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->StudentTable->setSortingEnabled(true);
     ui->ProgTable->setSortingEnabled(true);
+    ui->CollegeTable->setSortingEnabled(true);
 
     // Enable column headers sorting directly
     ui->StudentTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
     ui->ProgTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
+    ui->CollegeTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 }
 
 
@@ -116,6 +121,8 @@ void MainWindow::loadCSVProgram(const QString &filePath)
     currentCSVProgram = filePath;
 
     QFile file(filePath);
+    QStringList courseList;
+
     if (file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream in(&file);
@@ -127,31 +134,44 @@ void MainWindow::loadCSVProgram(const QString &filePath)
         while (!in.atEnd())
         {
             QString value = in.readLine().trimmed();
-
-            if (value.isEmpty()) // Ignore empty lines
-                continue;
+            if (value.isEmpty()) continue;
 
             QStringList rLine = value.split(',');
 
-            if (rLine.size() > 1)
+            if (rLine.size() >= 3)  // Ensure at least Program Code, Program Name, and College Code are present
             {
-                ui->CourseComboBox->addItem(rLine.at(0)); // Add course to ComboBox
-            }
+                QString programCode = rLine.at(0).trimmed();   // Program Code
+                QString programName = rLine.at(1).trimmed();   // Program Name
+                QString collegeCode = rLine.at(2).trimmed();   // College Code
 
-            programModel->appendRow({});
+                // Add course (program code) to the ComboBox
+                ui->CourseComboBox->addItem(programCode);
+                courseList << programCode;
+                // Append row data to the programModel
+                QList<QStandardItem *> items;
+                items << new QStandardItem(programCode)
+                      << new QStandardItem(programName)
+                      << new QStandardItem(collegeCode);
 
-            for (int i = 0; i < rLine.size(); i++)
-            {
-                QStandardItem *item = new QStandardItem(rLine.at(i).trimmed());
-                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-                programModel->setItem(row, i, item);
+                // Make all items in the row non-editable
+                for (auto &item : items)
+                    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+
+                programModel->appendRow(items);
+                row++;
             }
-            row++;
         }
         file.close();
     }
 
     programModel->setHorizontalHeaderLabels({"Program", "Program Name", "College Code"});
+
+    // Set up ComboBox with QCompleter for searchable dropdown
+    ui->CourseComboBox->setEditable(true);  // Make ComboBox searchable
+    QCompleter *completer = new QCompleter(courseList, this);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setFilterMode(Qt::MatchContains);  // Match anywhere in the text
+    ui->CourseComboBox->setCompleter(completer);
 }
 
 void MainWindow::loadCSVCollege(const QString &filePath)
@@ -220,7 +240,7 @@ void MainWindow::on_AddStudent_clicked()
     QString ID = ui->IDline->text().trimmed();
     QString Gen = ui->Genderline->currentText();
     int year = ui->Yearlevelline->currentText().toInt();
-    QString Cou = ui->CourseComboBox->currentText();
+    QString Cou = ui->CourseComboBox->currentText().trimmed();
 
     // Validate ID format (YYYY-NNNN)
     static const QRegularExpression idRegex(R"(^\d{4}-\d{4}$)");
@@ -282,49 +302,32 @@ void MainWindow::on_AddStudent_clicked()
 
     QMessageBox::information(this, "Success", "Student added successfully!");
 
-    // Clear input fields
-    ui->Lastnameline->clear();
-    ui->Firstnameline->clear();
-    ui->Middlenameline->clear();
-    ui->IDline->clear();
-    ui->Genderline->setCurrentIndex(-1);
-    ui->Yearlevelline->setCurrentIndex(-1);
-    ui->CourseComboBox->setCurrentIndex(-1);
+    clearStudentInputFields();
+
 }
 
-void MainWindow::on_EditStudent_clicked()
-{
-    QModelIndex currentIndex = ui->StudentTable->currentIndex(); // Get selected row
+void MainWindow::on_EditStudent_clicked() {
+    QModelIndex currentIndex = ui->StudentTable->currentIndex();
+
     if (!currentIndex.isValid()) {
         QMessageBox::warning(this, "Selection Error", "Please select a student to edit.");
         return;
     }
 
-    int row = currentIndex.row(); // Get the row index of the selected student
-
-    // Retrieve data from the selected row
-    QString ID = studentModel->item(row, 0)->text();
-    QString lastName = studentModel->item(row, 1)->text();
-    QString firstName = studentModel->item(row, 2)->text();
-    QString middleName = studentModel->item(row, 3)->text();
-    QString yearLevel = studentModel->item(row, 4)->text();
-    QString gender = studentModel->item(row, 5)->text();
-    QString course = studentModel->item(row, 6)->text();
-
-    // Populate the input fields for editing
-    ui->IDline->setText(ID);
+    int row = currentIndex.row();
+    ui->IDline->setText(studentModel->item(row, 0)->text());
     ui->IDline->setReadOnly(true);
-    ui->Lastnameline->setText(lastName);
-    ui->Firstnameline->setText(firstName);
-    ui->Middlenameline->setText(middleName);
-    ui->Yearlevelline->setCurrentText(yearLevel);
-    ui->Genderline->setCurrentText(gender);
-    ui->CourseComboBox->setCurrentText(course);
+    ui->Lastnameline->setText(studentModel->item(row, 1)->text());
+    ui->Firstnameline->setText(studentModel->item(row, 2)->text());
+    ui->Middlenameline->setText(studentModel->item(row, 3)->text());
+    ui->Yearlevelline->setCurrentText(studentModel->item(row, 4)->text());
+    ui->Genderline->setCurrentText(studentModel->item(row, 5)->text());
+    ui->CourseComboBox->setCurrentText(studentModel->item(row, 6)->text());
 
-    // Set to edit mode
     isEditing = true;
     currentEditingRow = row;
 }
+
 
 void MainWindow::on_SaveStudent_clicked()
 {
@@ -360,6 +363,7 @@ void MainWindow::on_SaveStudent_clicked()
 
     isEditing = false;
     currentEditingRow = -1;
+    clearStudentInputFields();
 }
 
 void MainWindow::updateStudentCSV()
@@ -440,40 +444,6 @@ void MainWindow::on_DeleteStudent_clicked()
     clearStudentInputFields();
 }
 
-//Clear
-void MainWindow::clearStudentInputFields()
-{
-    ui->IDline->clear();
-    ui->IDline->setReadOnly(true);
-    ui->Lastnameline->clear();
-    ui->Firstnameline->clear();
-    ui->Middlenameline->clear();
-    ui->Yearlevelline->setCurrentIndex(-1);
-    ui->Genderline->setCurrentIndex(-1);
-    ui->CourseComboBox->setCurrentIndex(-1);
-
-    isEditing = false;
-    currentEditingRow = -1;
-}
-
-void MainWindow::clearProgramInputFields(){
-    ui->ProgramCode_2->clear();
-    ui->ProgramName_2->clear();
-    ui->CollegeCodeCombbox->setCurrentIndex(-1);
-
-    isEditing = false;
-    currentEditingRow = -1;
-}
-
-void MainWindow::clearCollegeInputFields()
-{
-    ui->CollegeCodeLine->clear();
-    ui->CollegeNameLine->clear();
-
-    isEditing = false;
-    currentEditingRow = -1;
-}
-
 //Add program
 void MainWindow::on_AddProgram_2_clicked()
 {
@@ -545,10 +515,7 @@ void MainWindow::on_AddProgram_2_clicked()
 
     QMessageBox::information(this, "Success", "Program added successfully!");
 
-    ui->ProgramCode_2->clear();
-    ui->ProgramName_2->clear();
-    ui->CollegeCodeCombbox->setCurrentIndex(-1);
-
+    clearStudentInputFields();
 }
 
 void MainWindow::on_EditProg_clicked() {
@@ -602,6 +569,7 @@ void MainWindow::on_SaveProg_clicked() {
 
     isEditing = false;
     currentEditingRow = -1;
+    clearProgramInputFields();
 }
 
 void MainWindow::on_DeleteProgram_clicked()
@@ -780,23 +748,18 @@ void MainWindow::on_AddCollege_2_clicked() {
     loadCSVCollege(collegeFilePath);
 
     QMessageBox::information(this, "Success", "College added successfully!");
-
-    ui->CollegeCodeLine->clear();
-    ui->CollegeNameLine->clear();
+    clearStudentInputFields();
 }
 
 void MainWindow::on_EditCollege_clicked() {
     QModelIndex selectedIndex = ui->CollegeTable->currentIndex();
 
-    // Ensure a row is selected
     if (!selectedIndex.isValid()) {
         QMessageBox::warning(this, "Selection Error", "Please select a college to edit.");
         return;
     }
-    // Get the old college code before editing
     QString oldCollegeCode = ui->CollegeTable->model()->data(ui->CollegeTable->model()->index(selectedIndex.row(), 0)).toString().trimmed();
 
-    // Set the data in the input fields for editing
     ui->CollegeCodeLine->setText(oldCollegeCode);
     ui->CollegeNameLine->setText(ui->CollegeTable->model()->data(ui->CollegeTable->model()->index(selectedIndex.row(), 1)).toString());
 
@@ -835,6 +798,7 @@ void MainWindow::on_SaveCollege_clicked() {
 
     isEditing = false;
     currentEditingRow = -1;
+    clearCollegeInputFields();
 }
 
 void MainWindow::on_DeleteCollege_clicked()
@@ -1023,6 +987,96 @@ void MainWindow::on_Search_clicked()
         QMessageBox::information(this, "Search", "No matching records found in students, programs, or colleges.");
     }
 }
+
+void MainWindow::on_DeleteButton_clicked()
+{
+    int currentTab = ui->TabTable->currentIndex();
+    QTableView *currentTable = nullptr;
+
+    switch (currentTab) {
+    case 0:
+        currentTable = ui->StudentTable;
+        break;
+    case 1:
+        currentTable = ui->ProgTable;
+        break;
+    case 2:
+        currentTable = ui->CollegeTable;
+        break;
+    default:
+        QMessageBox::warning(this, "Tab Error", "Unknown tab selected.");
+        return;
+    }
+
+    QItemSelectionModel *selectionModel = currentTable->selectionModel();
+    QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    if (selectedIndexes.isEmpty()) {
+        QMessageBox::warning(this, "Selection Error", "Please select an item to delete.");
+        return;
+    }
+
+    QSet<int> uniqueRows;
+    for (const QModelIndex &index : selectedIndexes) {
+        uniqueRows.insert(index.row());
+    }
+
+    if (uniqueRows.size() > 1) {
+        QMessageBox::critical(this, "Selection Error", "Please select only one row to delete.");
+        return;
+    }
+
+    switch (currentTab) {
+    case 0:
+        on_DeleteStudent_clicked();
+        break;
+    case 1:
+        on_DeleteProgram_clicked();
+        break;
+    case 2:
+        on_DeleteCollege_clicked();
+        break;
+    }
+}
+
+
+//Clear
+void MainWindow::clearStudentInputFields()
+{
+    ui->IDline->clear();
+    ui->IDline->setReadOnly(true);
+    ui->Lastnameline->clear();
+    ui->Firstnameline->clear();
+    ui->Middlenameline->clear();
+    ui->Yearlevelline->setCurrentIndex(-1);
+    ui->Genderline->setCurrentIndex(-1);
+    ui->CourseComboBox->setCurrentIndex(-1);
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+void MainWindow::clearProgramInputFields(){
+    ui->ProgramCode_2->clear();
+    ui->ProgramName_2->clear();
+    ui->CollegeCodeCombbox->setCurrentIndex(-1);
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+void MainWindow::clearCollegeInputFields()
+{
+    ui->CollegeCodeLine->clear();
+    ui->CollegeNameLine->clear();
+
+    isEditing = false;
+    currentEditingRow = -1;
+}
+
+
+
+
 
 
 

@@ -53,6 +53,9 @@ private slots:
     void on_DeleteProgram_clicked();
     void on_DeleteCollege_clicked();
 
+    void on_DeleteButton_clicked();
+
+
 private:
     Ui::MainWindow *ui;
     QStandardItemModel *studentModel;

@@ -319,7 +319,7 @@
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: white;
-    border: 2px solid #800000;
+    border: 2px solid #00674F;
     border-radius: 10px;
     padding: 1px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -368,7 +368,7 @@
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -404,7 +404,7 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -421,26 +421,6 @@ QPushButton:hover {
     </property>
     <property name="text">
      <string>Add</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="DeleteStudent">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>350</y>
-      <width>91</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">
-QPushButton:hover {
-    background-color: #808080;
-    border: 2px solid #2980b9;
-}</string>
-    </property>
-    <property name="text">
-     <string>Delete</string>
     </property>
    </widget>
    <widget class="QPushButton" name="SaveStudent">
@@ -518,7 +498,7 @@ QPushButton:hover {
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -550,7 +530,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -598,6 +578,31 @@ QPushButton:hover {
       </widget>
      </widget>
     </widget>
+    <widget class="QPushButton" name="DeleteButton">
+     <property name="geometry">
+      <rect>
+       <x>670</x>
+       <y>30</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">
+QPushButton {
+    background-color: #c70000 ;
+    color: white;
+    border: 2px solid #000000;
+    border-radius: 5px;
+     padding: 1px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    color: white; 
+}</string>
+     </property>
+     <property name="text">
+      <string>Delete</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QComboBox" name="CourseComboBox">
     <property name="geometry">
@@ -640,14 +645,14 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: white;
-    border: 2px solid #800000;
+    border: 2px solid #00674F;
     border-radius: 10px;
     padding: 1px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     color: black;</string>
     </property>
     <property name="text">
-     <string>Add Program</string>
+     <string>Program</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -671,14 +676,14 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">background-color: white;
-    border: 2px solid #800000;
+    border: 2px solid #00674F;
     border-radius: 10px;
     padding: 1px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     color: black;</string>
     </property>
     <property name="text">
-     <string>Add College</string>
+     <string>College</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -831,7 +836,7 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -867,7 +872,7 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -903,7 +908,7 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -939,7 +944,7 @@ QPushButton:hover {
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton {
-    background-color: #800000;
+    background-color: #00674F;
     color: white;
     border: 2px solid #000000;
     border-radius: 5px;
@@ -1006,46 +1011,6 @@ QPushButton:hover {
       <width>181</width>
       <height>26</height>
      </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="DeleteProgram">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>610</y>
-      <width>81</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">
-QPushButton:hover {
-    background-color: #808080;
-    border: 2px solid #2980b9;
-}</string>
-    </property>
-    <property name="text">
-     <string>Delete</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="DeleteCollege">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>560</y>
-      <width>81</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">
-QPushButton:hover {
-    background-color: #808080;
-    border: 2px solid #2980b9;
-}</string>
-    </property>
-    <property name="text">
-     <string>Delete</string>
     </property>
    </widget>
    <widget class="QComboBox" name="CollegeCodeCombbox">
