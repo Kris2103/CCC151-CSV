@@ -530,7 +530,7 @@ QPushButton:hover {
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -601,6 +601,16 @@ QPushButton {
      </property>
      <property name="text">
       <string>Delete</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="Searchby">
+     <property name="geometry">
+      <rect>
+       <x>165</x>
+       <y>30</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
      </property>
     </widget>
    </widget>

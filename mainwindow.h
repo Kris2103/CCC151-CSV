@@ -57,6 +57,8 @@ private slots:
     void refreshCollegeCodeComboBox();
     void refreshCourseComboBox();
 
+    void on_tabWidget_currentChanged(int index);
+
 
 private:
     Ui::MainWindow *ui;

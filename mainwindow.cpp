@@ -47,14 +47,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->ProgTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);  // Program Name
 
-    ui -> CourseComboBox -> setCurrentIndex(-1);
-    ui -> Genderline -> setCurrentIndex(-1);
-    ui -> Yearlevelline -> setCurrentIndex(-1);
-    ui -> CollegeCodeCombbox -> setCurrentIndex(-1);
+    ui->CourseComboBox -> setCurrentIndex(-1);
+    ui->Genderline -> setCurrentIndex(-1);
+    ui->Yearlevelline -> setCurrentIndex(-1);
+    ui->CollegeCodeCombbox -> setCurrentIndex(-1);
 
-    studentModel->setHorizontalHeaderLabels({"I.D. Number", "Last Name", "First Name", "Middle Name", "Year Level", "Gender", "Course Code"});
+    studentModel->setHorizontalHeaderLabels({"I.D. Number", "First Name", "Middle Name", "Last Name", "Year Level", "Gender", "Program Code"});
+
     programModel->setHorizontalHeaderLabels({"Program", "Program Name", "College Code"});
-    collegeModel->setHorizontalHeaderLabels({"College Name", "College Code"});
+    collegeModel->setHorizontalHeaderLabels({"College Code", "College Name"});
 
     studentProxyModel->setSourceModel(studentModel);
     studentProxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -68,6 +69,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->StudentTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
     ui->ProgTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
     ui->CollegeTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
+
+    connect(ui->TabTable, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
 }
 
 
@@ -122,7 +125,7 @@ void MainWindow::loadCSVStudents(const QString &filePath)
 
     file.close();
 
-    studentModel->setHorizontalHeaderLabels({"I.D. Number", "Last Name", "First Name", "Middle Name", "Year Level", "Gender", "Course Code"});
+    studentModel->setHorizontalHeaderLabels({"I.D. Number", "First Name", "Middle Name", "Last Name", "Year Level", "Gender", "Program Code"});
 }
 
 void MainWindow::loadCSVProgram(const QString &filePath)
@@ -196,8 +199,8 @@ void MainWindow::loadCSVProgram(const QString &filePath)
 void MainWindow::loadCSVCollege(const QString &filePath)
 {
     collegeModel->clear();
-    ui->CollegeCodeCombbox->setCurrentIndex(-1);
     ui->CollegeCodeCombbox->clear();
+    ui->CollegeCodeCombbox->setCurrentIndex(-1);
     currentCSVCollege = filePath;
 
     QFile file(filePath);
@@ -350,7 +353,7 @@ void MainWindow::on_AddStudent_clicked()
         return;
     }
 
-    QString newStudentData = ID + "," + Las + "," + Fir + "," + Mid + "," + QString::number(year) + "," + Gen + "," + Cou;
+    QString newStudentData = ID + "," + Fir + "," + Mid + "," + Las + "," + QString::number(year) + "," + Gen + "," + Cou;
 
     if (!studentsFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
     {
@@ -383,9 +386,9 @@ void MainWindow::on_EditStudent_clicked() {
     int row = currentIndex.row();
     ui->IDline->setText(studentModel->item(row, 0)->text());
     ui->IDline->setReadOnly(true);
-    ui->Lastnameline->setText(studentModel->item(row, 1)->text());
-    ui->Firstnameline->setText(studentModel->item(row, 2)->text());
-    ui->Middlenameline->setText(studentModel->item(row, 3)->text());
+    ui->Firstnameline->setText(studentModel->item(row, 1)->text());
+    ui->Middlenameline->setText(studentModel->item(row, 2)->text());
+    ui->Lastnameline->setText(studentModel->item(row, 3)->text());
     ui->Yearlevelline->setCurrentText(studentModel->item(row, 4)->text());
     ui->Genderline->setCurrentText(studentModel->item(row, 5)->text());
     ui->CourseComboBox->setCurrentText(studentModel->item(row, 6)->text());
@@ -430,9 +433,9 @@ void MainWindow::on_SaveStudent_clicked()
     }
     // Update the model with new data
     studentModel->setItem(currentEditingRow, 0, new QStandardItem(updatedID));
-    studentModel->setItem(currentEditingRow, 1, new QStandardItem(updatedLastName));
-    studentModel->setItem(currentEditingRow, 2, new QStandardItem(updatedFirstName));
-    studentModel->setItem(currentEditingRow, 3, new QStandardItem(updatedMiddleName));
+    studentModel->setItem(currentEditingRow, 1, new QStandardItem(updatedFirstName));
+    studentModel->setItem(currentEditingRow, 2, new QStandardItem(updatedMiddleName));
+    studentModel->setItem(currentEditingRow, 3, new QStandardItem(updatedLastName));
     studentModel->setItem(currentEditingRow, 4, new QStandardItem(updatedYearLevel));
     studentModel->setItem(currentEditingRow, 5, new QStandardItem(updatedGender));
     studentModel->setItem(currentEditingRow, 6, new QStandardItem(updatedCourse));
@@ -456,7 +459,7 @@ void MainWindow::updateStudentCSV()
 
     QTextStream out(&file);
 
-    out << "ID,LastName,FirstName,MiddleName,YearLevel,Gender,ProgramCode\n";
+    out << "ID,FirstName,MiddleName,LastName,YearLevel,Gender,ProgramCode\n";
 
     for (int row = 0; row < studentModel->rowCount(); ++row) {
         QStringList rowData;
@@ -1127,90 +1130,6 @@ void MainWindow::updateCollegeCSV()
 }
 
 
-
-//Search
-void MainWindow::on_Search_clicked()
-{
-    QString searchTerm = ui->SearchLine->text().trimmed();
-
-    if (searchTerm.isEmpty()) {
-        loadCSVStudents("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv");
-        loadCSVProgram("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv");
-        loadCSVCollege("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv");
-
-        ui->StudentTable->setModel(studentModel);
-        ui->StudentTable->resizeColumnsToContents();
-
-        ui->ProgTable->setModel(programModel);
-        ui->ProgTable->resizeColumnsToContents();
-
-        ui->CollegeTable->setModel(collegeModel);
-        ui->CollegeTable->resizeColumnsToContents();
-
-        ui->CollegeCodeCombbox->setCurrentIndex(-1);
-        ui->CourseComboBox->setCurrentIndex(-1);
-
-        QMessageBox::information(this, "Search Reset", "All data has been reloaded.");
-        return;
-    }
-
-    bool studentFound = false;
-    bool programFound = false;
-    bool collegeFound = false;
-
-    // Search Student
-    for (int row = 0; row < studentModel->rowCount(); ++row) {
-        bool rowMatches = false;
-        for (int col = 0; col < studentModel->columnCount(); ++col) {
-            QString cellText = studentModel->item(row, col)->text();
-            if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
-                rowMatches = true;
-                studentFound = true;
-                break;
-            }
-        }
-        ui->StudentTable->setRowHidden(row, !rowMatches);
-    }
-
-    // Search Program Table
-    for (int row = 0; row < programModel->rowCount(); ++row) {
-        bool rowMatches = false;
-        for (int col = 0; col < programModel->columnCount(); ++col) {
-            QString cellText = programModel->item(row, col)->text();
-            if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
-                rowMatches = true;
-                programFound = true;
-                break;
-            }
-        }
-        ui->ProgTable->setRowHidden(row, !rowMatches);
-    }
-
-    // Search College Table
-    for (int row = 0; row < collegeModel->rowCount(); ++row) {
-        bool rowMatches = false;
-        for (int col = 0; col < collegeModel->columnCount(); ++col) {
-            QString cellText = collegeModel->item(row, col)->text();
-            if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
-                rowMatches = true;
-                collegeFound = true;
-                break;
-            }
-        }
-        ui->CollegeTable->setRowHidden(row, !rowMatches);
-    }
-
-    if (!studentFound && !programFound && !collegeFound) {
-        QMessageBox::information(this, "Search", "No matching records found in students, programs, or colleges.");
-    }
-    clearStudentInputFields();
-    clearProgramInputFields();
-    clearCollegeInputFields();
-
-    //ui->CollegeCodeCombbox->setCurrentIndex(-1);
-    //ui->CourseComboBox->setCurrentIndex(-1);
-}
-
 void MainWindow::on_DeleteButton_clicked()
 {
     int currentTab = ui->TabTable->currentIndex();
@@ -1319,24 +1238,195 @@ void MainWindow::refreshCourseComboBox() {
     }
 }
 
+void MainWindow::on_Search_clicked()
+{
+    QString searchTerm = ui->SearchLine->text().trimmed();
+    QString searchField = ui->Searchby->currentText();
+
+    // If search term is empty, reload all data
+    if (searchTerm.isEmpty()) {
+        // Clear previous data in the tables
+        studentModel->clear();
+        programModel->clear();
+        collegeModel->clear();
+
+        // Reload all CSV data
+        loadCSVStudents("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Student.csv");
+        loadCSVProgram("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//Program.csv");
+        loadCSVCollege("C://Users//Kristelle//Documents//BSCS-3//CCC151 - Database Management//CCC151-CSV//College.csv");
+
+        ui->StudentTable->setModel(studentModel);
+        ui->ProgTable->setModel(programModel);
+        ui->CollegeTable->setModel(collegeModel);
+
+        ui->CollegeCodeCombbox->setCurrentIndex(-1);
+        ui->CourseComboBox->setCurrentIndex(-1);
+
+        QMessageBox::information(this, "Search Reset", "All data has been reloaded.");
+        return;
+    }
+
+    bool studentFound = false;
+    bool programFound = false;
+    bool collegeFound = false;
+
+    // Get the current active tab
+    int currentTabIndex = ui->TabTable->currentIndex();
+
+    if (currentTabIndex == 0) {  // Student Tab
+        if (searchField == "All Fields") {
+            for (int row = 0; row < studentModel->rowCount(); ++row) {
+                bool rowMatches = false;
+                for (int col = 0; col < studentModel->columnCount(); ++col) {
+                    QString cellText = studentModel->item(row, col)->text();
+                    if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
+                        rowMatches = true;
+                        break;
+                    }
+                }
+                ui->StudentTable->setRowHidden(row, !rowMatches);
+                studentFound = rowMatches || studentFound;
+            }
+        } else if (searchField == "ID Number") {
+            for (int row = 0; row < studentModel->rowCount(); ++row) {
+                QString idNumber = studentModel->item(row, 0)->text().trimmed();
+                if (idNumber.contains(searchTerm.trimmed(), Qt::CaseInsensitive)) {
+                    ui->StudentTable->setRowHidden(row, false);
+                    studentFound = true;
+                } else {
+                    ui->StudentTable->setRowHidden(row, true);
+                }
+            }
+        } else {
+            int columnIndex = -1;
+            if (searchField == "First Name") columnIndex = 1;
+            else if (searchField == "Middle Name") columnIndex = 2;
+            else if (searchField == "Last Name") columnIndex = 3;
+            else if (searchField == "Year Level") columnIndex = 4;
+            else if (searchField == "Gender") columnIndex = 5;
+            else if (searchField == "Program Code") columnIndex = 6;
+
+            if (columnIndex != -1) {
+                for (int row = 0; row < studentModel->rowCount(); ++row) {
+                    QString cellValue = studentModel->item(row, columnIndex)->text();
+                    if (cellValue.contains(searchTerm, Qt::CaseInsensitive)) {
+                        ui->StudentTable->setRowHidden(row, false);
+                        studentFound = true;
+                    } else {
+                        ui->StudentTable->setRowHidden(row, true);
+                    }
+                }
+            }
+        }
+    } else if (currentTabIndex == 1) {  // Program Tab
+        if (searchField == "All Fields") {
+            for (int row = 0; row < programModel->rowCount(); ++row) {
+                bool rowMatches = false;
+                for (int col = 0; col < programModel->columnCount(); ++col) {
+                    QString cellText = programModel->item(row, col)->text();
+                    if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
+                        rowMatches = true;
+                        break;
+                    }
+                }
+                ui->ProgTable->setRowHidden(row, !rowMatches);
+                programFound = rowMatches || programFound;
+            }
+        } else {
+            int columnIndex = -1;
+            if (searchField == "Program Code") columnIndex = 0;
+            else if (searchField == "Program Name") columnIndex = 1;
+            else if (searchField == "College Code") columnIndex = 2;
+
+            if (columnIndex != -1) {
+                for (int row = 0; row < programModel->rowCount(); ++row) {
+                    QString cellValue = programModel->item(row, columnIndex)->text();
+                    if (cellValue.contains(searchTerm, Qt::CaseInsensitive)) {
+                        ui->ProgTable->setRowHidden(row, false);
+                        programFound = true;
+                    } else {
+                        ui->ProgTable->setRowHidden(row, true);
+                    }
+                }
+            }
+        }
+    } else if (currentTabIndex == 2) {  // College Tab
+        if (searchField == "All Fields") {
+            for (int row = 0; row < collegeModel->rowCount(); ++row) {
+                bool rowMatches = false;
+                for (int col = 0; col < collegeModel->columnCount(); ++col) {
+                    QString cellText = collegeModel->item(row, col)->text();
+                    if (cellText.contains(searchTerm, Qt::CaseInsensitive)) {
+                        rowMatches = true;
+                        break;
+                    }
+                }
+                ui->CollegeTable->setRowHidden(row, !rowMatches);
+                collegeFound = rowMatches || collegeFound;
+            }
+        } else {
+            int columnIndex = -1;
+            if (searchField == "College Code") columnIndex = 0;
+            else if (searchField == "College Name") columnIndex = 1;
+
+            if (columnIndex != -1) {
+                for (int row = 0; row < collegeModel->rowCount(); ++row) {
+                    QString cellValue = collegeModel->item(row, columnIndex)->text();
+                    if (cellValue.contains(searchTerm, Qt::CaseInsensitive)) {
+                        ui->CollegeTable->setRowHidden(row, false);
+                        collegeFound = true;
+                    } else {
+                        ui->CollegeTable->setRowHidden(row, true);
+                    }
+                }
+            }
+        }
+    }
+
+    // Show message if no matches were found
+    if (!studentFound && !programFound && !collegeFound) {
+        QMessageBox::information(this, "Search", "No matching records found based on the selected search field.");
+    }
+}
 
 
 
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    qDebug() << "Tab changed to index:" << index; // Debug log to check tab index
+
+    ui->Searchby->clear();  // Clear previous items in the combobox
+
+    switch(index) {
+    case 0: // Student Tab
+        qDebug() << "Populating Searchby for Student Tab";
+        ui->Searchby->addItem("All Fields");  // Add "All Fields" for Student Tab
+        ui->Searchby->addItem("ID Number");   // ID Number is the first column
+        ui->Searchby->addItem("Last Name");   // Last Name is the fourth column
+        ui->Searchby->addItem("First Name");  // First Name is the second column
+        ui->Searchby->addItem("Middle Name"); // Middle Name is the third column
+        ui->Searchby->addItem("Year Level");  // Year Level is the fifth column
+        ui->Searchby->addItem("Gender");      // Gender is the sixth column
+        ui->Searchby->addItem("Program Code"); // Program Code is the seventh column
+        break;
 
 
+    case 1: // Program Tab
+        qDebug() << "Populating Searchby for Program Tab";
+        ui->Searchby->addItem("All Fields");  // Add "All Fields" for Program Tab
+        ui->Searchby->addItem("Program Code");
+        ui->Searchby->addItem("Program Name");
+        ui->Searchby->addItem("College Code");
+        break;
 
+    case 2: // College Tab
+        qDebug() << "Populating Searchby for College Tab";
+        ui->Searchby->addItem("All Fields");  // Add "All Fields" for College Tab
+        ui->Searchby->addItem("College Code");
+        ui->Searchby->addItem("College Name");
+        break;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    default:
+        break;
+    }
+}
