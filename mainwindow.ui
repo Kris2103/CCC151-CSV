@@ -606,9 +606,9 @@ QPushButton {
     <widget class="QComboBox" name="Searchby">
      <property name="geometry">
       <rect>
-       <x>165</x>
+       <x>145</x>
        <y>30</y>
-       <width>91</width>
+       <width>111</width>
        <height>20</height>
       </rect>
      </property>
