@@ -54,6 +54,8 @@ private slots:
     void on_DeleteCollege_clicked();
 
     void on_DeleteButton_clicked();
+    void refreshCollegeCodeComboBox();
+    void refreshCourseComboBox();
 
 
 private:

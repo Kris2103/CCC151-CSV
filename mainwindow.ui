@@ -440,7 +440,7 @@ QPushButton:hover {
 }</string>
     </property>
     <property name="text">
-     <string>Save</string>
+     <string>Update</string>
     </property>
    </widget>
    <widget class="QFrame" name="frame">
@@ -980,7 +980,7 @@ QPushButton:hover {
 }</string>
     </property>
     <property name="text">
-     <string>Save</string>
+     <string>Update</string>
     </property>
    </widget>
    <widget class="QPushButton" name="SaveProg">
@@ -1000,7 +1000,7 @@ QPushButton:hover {
 }</string>
     </property>
     <property name="text">
-     <string>Save</string>
+     <string>Update</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="CollegeCodeLine">
