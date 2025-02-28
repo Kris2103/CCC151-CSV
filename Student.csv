@@ -1,13 +1,21 @@
-﻿ID Number,First name,Last name,Middle Name,Year Level,Gender,Program Code
+ID,FirstName,MiddleName,LastName,YearLevel,Gender,ProgramCode
+2021-0101,Miane,Velez,Powell,4,Female,BSA
+2021-0102,Jasper,Vermonte,Jenkins,4,Male,BSEcon
+2021-0103,Joselle,Yu,Perry,4,Female,BSHM
+2021-0104,Armaine,Yap,Russell,4,Male,BSPsych
+2021-0105,Lewis,Ying,Sullivan,4,Male,BA Fil
+2021-0106,Jordan,Ypil,Bell,4,Male,BA Pol Sci
+2021-0107,Isaac,Yuson,Coleman,4,Male,BA History
+2021-0108,Francesca,Yulo,Butler,4,Female,BSCA
 2022-0001,Adrian,Abad,Smith,3,Male,BSCS
 2022-0002,Aileen,Abalos,Johnson,3,Female,BSCS
-2022-0003,Alberto,Abella ,Williams,3,Male,BSA
+2022-0003,Alberto,Abella,Williams,3,Male,BSA
 2022-0004,Angelica,Acosta,Brown,3,Female,BSBA
 2022-0005,Lewis,Aguinaldo,Jones,3,Male,BSIT
 2022-0006,Benedict,Bautista,Garcia,3,Male,BSEcon
 2022-0007,Bianca,Beltran,Miller,3,Female,BSCA
 2022-0008,Jade,Bernal,Davis,3,Male,BSCE
-2022-0009,Bryan,Borja,Rodriguez,3,Male,BSCHE
+2022-0009,Bryan,Borja,Rodriguez,3,Male,BSCHEhh
 2022-0010,Bella,Borja,Martinez,3,Female,BA Fil
 2022-0011,Christian,Cruz,Hernandez,3,Male,BA Pol Sci
 2022-0012,Jillo,Calunsag,Lopez,3,Female,BSCS
@@ -16,7 +24,7 @@
 2022-0015,Angelo,Cabungcag,Anderson,3,Male,BSIS
 2022-0016,Daniel,Dela Cruz,Thomas,3,Male,BSME
 2022-0017,Diana,De Guzman,Taylor,3,Female,BSCE
-2022-0018,Dominic,Dimaculangan ,Moore,3,Male,BSCHE
+2022-0018,Dominic,Dimaculangan,Moore,3,Male,BSCHEhh
 2022-0019,Donna,Dumlao,Jackson,3,Female,BSEM
 2022-0020,Ester,Dimpas,Martin,3,Female,BSStat
 2022-0021,John,Dagpin,Lee,3,Male,BSMath
@@ -29,7 +37,7 @@
 2022-0028,Michael,Fajardo,Ramirez,3,Male,BSBA
 2022-0029,Josh,Flores,Lewis,3,Male,BSA
 2022-0030,Miles,Francisco,Robinson,3,Male,BSEcon
-2022-0031,Erwin,Fuentes ,Walker,3,Male,BSHM
+2022-0031,Erwin,Fuentes,Walker,3,Male,BSHM
 2022-0032,Xander,Fernando,Young,3,Male,BSPsych
 2022-0033,Bianca,Fernandez,Allen,3,Female,BA Fil
 2022-0034,Carlo,Galang,King,3,Male,BA Pol Sci
@@ -40,7 +48,7 @@
 2022-0039,Francis,Hernandez,Hill,3,Male,BSIS
 2022-0040,Fredrick,Herrera,Flores,3,Male,BSME
 2022-0041,Franco,Hilario,Green,3,Male,BSCE
-2022-0042,Ian,Huang,Adams,3,Male,BSCHE
+2022-0042,Ian,Huang,Adams,3,Male,BSCHEhh
 2022-0043,Isabel,Ignacio,Nelson,3,Female,BSEM
 2022-0044,Joel,Ilagan,Baker,3,Male,BSStat
 2022-0045,Kevin,Imperio,Hall,3,Male,BSMath
@@ -57,15 +65,15 @@
 2023-0056,Brian,Lopez,Parker,2,Male,BSPsych
 2023-0057,Elaine,Macapagan,Cruz,2,Female,BA Fil
 2023-0058,Emmanuel,Manalo,Edwards,2,Male,BA Pol Sci
-2023-0059,Fiona,Mangubat ,Collins,2,Female,BA History
+2023-0059,Fiona,Mangubat,Collins,2,Female,BA History
 2023-0060,Franco,Mendoza,Reyes,2,Male,BSCS
 2023-0061,Giselle,Mindoro,Stewart,2,Female,BSIT
 2023-0062,Gilbert,Navarro,Morris,2,Male,BSCA
 2023-0063,Hector,Nazareno,Morales,2,Male,BSIS
 2023-0064,Henry,Navarrete,Murphy,2,Male,BSME
 2023-0065,Harold,Ngo,Cook,2,Male,BSCE
-2023-0066,Isabel,Nobleza,Rogers,2,Female,BSCHE
-2023-0067,Ivy,Ong ,Gutierrez,2,Female,BSEM
+2023-0066,Isabel,Nobleza,Rogers,2,Female,BSCHEhh
+2023-0067,Ivy,Ong,Gutierrez,2,Female,BSEM
 2023-0068,Ivan,Ocampo,Ortiz,2,Male,BSStat
 2023-0069,Jasmine,Olanio,Morgan,2,Female,BSMath
 2023-0070,James,Olivares,Cooper,2,Male,BSBio
@@ -88,22 +96,14 @@
 2024-0087,Catherine,Samson,Gray,1,Female,BSIS
 2024-0088,Cedric,San Pedro,Mendoza,1,Male,BSME
 2024-0089,Daphne,Santiago,Ruiz,1,Female,BSCE
-2024-0090,David,Santos,Hughes,1,Male,BSCHE
+2024-0090,David,Santos,Hughes,1,Male,BSCHEhh
 2024-0091,Denise,Sanchez,Price,1,Female,BSEM
 2024-0092,Felicia,Tan,Alvarez,1,Female,BSStat
 2024-0093,Gabriel,Tamayo,Castillo,1,Male,BSMath
-2024-0094,Geraldine,Ting ,Sanders,1,Female,BSBio
+2024-0094,Geraldine,Ting,Sanders,1,Female,BSBio
 2024-0095,Giselle,Tejada,Patel,1,Female,BSChem
 2024-0096,Hazel,Torres,Myers,1,Female,BEED
 2024-0097,Isaiah,Tagolgol,Long,1,Male,BSED
 2024-0098,Ivy,Uy,Ross,1,Female,BSED-Bio
 2024-0099,Lou,Ureta,Foster,1,Female,BPED
 2024-0100,Marie,Villanueva,Jimenez,1,Female,BSBA
-2021-0101,Miane,Velez,Powell,4,Female,BSA
-2021-0102,Jasper,Vermonte,Jenkins,4,Male,BSEcon
-2021-0103,Joselle,Yu,Perry,4,Female,BSHM
-2021-0104,Armaine,Yap,Russell,4,Male,BSPsych
-2021-0105,Lewis,Ying,Sullivan,4,Male,BA Fil
-2021-0106,Jordan,Ypil,Bell,4,Male,BA Pol Sci
-2021-0107,Isaac,Yuson,Coleman,4,Male,BA History
-2021-0108,Francesca,Yulo,Butler,4,Female,BSCA

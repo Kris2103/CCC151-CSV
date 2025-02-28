@@ -1,25 +1,26 @@
-Program Code,Program Name,College Code
-BSCS,Bachelor of Science in Computer Science,CCS
-BSIT,Bachelor of Science in Information Techonology,CCS
-BSCA,Bachelor of Science Computer Application,CCS
-BSIS,Bachelor of Science in Information System,CCS
-BSME,Bachelor of Science in Mechanical Engineering,COE
-BSCE,Bachelor of Civil Engineering,COE
-BSCHE,Bachelor of Science in Chemical Engineering,COE
-BSEM,Bachelor of Science in Mining Engineering,COE
-BSStat,Bachelor of Science in Statistics,CSM
-BSMath,Bachelor of Science in Mathematics,CSM
-BSBio,Bachelor of Science in Biology,CSM
-BSChem,Bachelor of Science in Chemistry,CSM
+ProgramCode,ProgramName,CollegeCode
+BA Fil,Bachelor of Arts in Filipino,CASS
+BA History,Bachelor of Arts in History,CASS
+BA Pol Sci,Bachelor of Arts in Political Science,CASS
 BEED,Bachelor in Elementary Education,CED
+BPED,Bachelor of Physical Education,CED
+BSA,Bachelor of Science in Accountancy,CEBA
+BSBA,Bachelor of Science in Business Administration,CEBA
+BSBio,Bachelor of Science in Biology,CSM
+BSCA,Bachelor of Science Computer Application,CCS
+BSCE,Bachelor of Civil Engineering,COE
+BSCHEhh,Bachelor of Science in Chemical Engineering,COE
+BSCS,Bachelor of Science in Computer Science,CCS
+BSChem,Bachelor of Science in Chemistry,CSM
 BSED,Bachelor of Science in Education,CED
 BSED-Bio,Bachelor of Science in Education - Biology,CED
-BPED,Bachelor of Physical Education,CED
-BSBA,Bachelor of Science in Business Administration,CEBA
-BSA,Bachelor of Science in Accountancy,CEBA
+BSEM,Bachelor of Science in Mining Engineering,COE
 BSEcon,Bachelor of Science in Economics,CEBA
 BSHM,Bachelor of Science in Hospitality Management,CEBA
+BSIS,Bachelor of Science in Information System,CCS
+BSIT,Bachelor of Science in Information Techonology,CCS
+BSME,Bachelor of Science in Mechanical Engineering,COE
+BSMath,Bachelor of Science in Mathematics,CSM
 BSPsych,Bachelor of Science in Psychology,CASS
-BA Fil,Bachelor of Arts in Filipino,CASS
-BA Pol Sci,Bachelor of Arts in Political Science,CASS
-BA History,Bachelor of Arts in History,CASS
+BSStat,Bachelor of Science in Statistics,CSM
+ahha,hhaha,CED

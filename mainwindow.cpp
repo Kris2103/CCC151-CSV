@@ -42,9 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->CollegeTable->horizontalHeader()->setMinimumSectionSize(150);
 
 
-    ui->ProgTable->setColumnWidth(0, 100);   // Program Code (fixed width)
+    ui->ProgTable->setColumnWidth(0, 115);   // Program Code (fixed width)
     ui->ProgTable->setColumnWidth(2, 100);   // College Code (fixed width)
-
     ui->ProgTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);  // Program Name
 
     ui->CourseComboBox -> setCurrentIndex(-1);
@@ -53,8 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->CollegeCodeCombbox -> setCurrentIndex(-1);
 
     studentModel->setHorizontalHeaderLabels({"I.D. Number", "First Name", "Middle Name", "Last Name", "Year Level", "Gender", "Program Code"});
-
-    programModel->setHorizontalHeaderLabels({"Program", "Program Name", "College Code"});
+    programModel->setHorizontalHeaderLabels({"Program Code", "Program Name", "College Code"});
     collegeModel->setHorizontalHeaderLabels({"College Code", "College Name"});
 
     studentProxyModel->setSourceModel(studentModel);
@@ -71,6 +69,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->CollegeTable->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 
     connect(ui->TabTable, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
+
+    // Default Student Tab
+    ui->TabTable->setCurrentIndex(0);
+
+    // Call existing function to populate Searchby dynamically
+    on_tabWidget_currentChanged(0);
 }
 
 
@@ -178,7 +182,7 @@ void MainWindow::loadCSVProgram(const QString &filePath)
         file.close();
     }
 
-    programModel->setHorizontalHeaderLabels({"Program", "Program Name", "College Code"});
+    programModel->setHorizontalHeaderLabels({"Program Code", "Program Name", "College Code"});
     ui->ProgTable->setModel(programModel);
     ui->ProgTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
@@ -372,6 +376,7 @@ void MainWindow::on_AddStudent_clicked()
     QMessageBox::information(this, "Success", "Student added successfully!");
     ui->IDline->clear();
     clearStudentInputFields();
+    ui->IDline->setReadOnly(false);
 
 }
 
@@ -802,9 +807,9 @@ void MainWindow::on_DeleteProgram_clicked()
     for (const QString &line : updatedStudentData)
         studentOut << line << "\n";
     studentFile.close();
-    loadCSVStudents(studentFilePath); // Refresh student data
     refreshCourseComboBox();
     refreshCollegeCodeComboBox();
+    loadCSVStudents(studentFilePath); // Refresh student data
 
     QMessageBox::information(this, "Success", "Program deleted and related students updated to 'Unenrolled' successfully.");
     ui->CollegeCodeCombbox->setCurrentIndex(-1);
@@ -831,7 +836,7 @@ void MainWindow::updateProgramCSV()
         for (int col = 0; col < programModel->columnCount(); ++col) {
             QStandardItem *item = programModel->item(row, col);
             QString cellText = item ? item->text() : "";
-            // ✅ Handle commas by wrapping text in quotes
+            // Handle commas by wrapping text in quotes
             if (cellText.contains(",")) {
                 cellText = "\"" + cellText + "\"";
             }
@@ -885,7 +890,7 @@ void MainWindow::on_AddCollege_2_clicked() {
         QString line = in.readLine().trimmed();
         QStringList parts = line.split(',');
 
-        if (parts.size() == 2 && parts[0].trimmed() == collegeCode) {
+        if (!parts.isEmpty() && parts[0].trimmed()== collegeCode) {
             codeExists = true;
             break;
         }
@@ -908,9 +913,10 @@ void MainWindow::on_AddCollege_2_clicked() {
     out << newCollegeData << "\n";  // Append new college data
     collegeFile.close();
 
-    loadCSVCollege(collegeFilePath);
     refreshCollegeCodeComboBox();
     refreshCourseComboBox();
+    loadCSVCollege(collegeFilePath);
+
     ui->CollegeCodeCombbox->setCurrentIndex(-1);
     ui->CourseComboBox->setCurrentIndex(-1);
 
@@ -945,6 +951,7 @@ void MainWindow::on_EditCollege_clicked() {
 
     isEditing = true;
     currentEditingRow = selectedRow;
+    ui->IDline->setReadOnly(false);
     //ui->AddCollege->setEnabled(false);
 }
 
@@ -974,16 +981,18 @@ void MainWindow::on_SaveCollege_clicked() {
         }
     }
     updateProgramCSV(); // Save updated program data
+    refreshCollegeCodeComboBox();
     ui->CollegeCodeCombbox->setCurrentIndex(-1);
     ui->CourseComboBox->setCurrentIndex(-1);
 
     QMessageBox::information(this, "Success", "College and related programs updated successfully.");
 
-    ui->CollegeCodeCombbox->clear();
-    ui->CourseComboBox->clear();
+    //ui->CollegeCodeCombbox->clear();
+    //ui->CourseComboBox->clear();
     isEditing = false;
     currentEditingRow = -1;
     clearCollegeInputFields();
+    ui->IDline->setReadOnly(false);
 }
 
 void MainWindow::on_DeleteCollege_clicked()
@@ -1114,7 +1123,7 @@ void MainWindow::updateCollegeCSV()
         for (int col = 0; col < collegeModel->columnCount(); ++col) {
             QStandardItem *item = collegeModel->item(row, col);
             QString cellText = item ? item->text() : "";
-            // ✅ Handle commas by wrapping text in quotes
+            // Handle commas by wrapping text in quotes
             if (cellText.contains(",")) {
                 cellText = "\"" + cellText + "\"";
             }
@@ -1124,8 +1133,8 @@ void MainWindow::updateCollegeCSV()
     }
 
     out.flush();
-    ui->CollegeCodeCombbox->clear();
-    ui->CourseComboBox->clear();
+    //ui->CollegeCodeCombbox->clear();
+    //ui->CourseComboBox->clear();
     collegeFile.close();
 }
 
@@ -1167,11 +1176,6 @@ void MainWindow::on_DeleteButton_clicked()
 
     if (uniqueRows.size() > 1) {
         QMessageBox::critical(this, "Selection Error", "Please select only one row to delete.");
-        return;
-    }
-    int confirm = QMessageBox::question(this, "Confirm Deletion", "Are you sure you want to delete the selected item?",
-                                        QMessageBox::Yes | QMessageBox::No);
-    if (confirm == QMessageBox::No) {
         return;
     }
 
@@ -1287,7 +1291,7 @@ void MainWindow::on_Search_clicked()
                 ui->StudentTable->setRowHidden(row, !rowMatches);
                 studentFound = rowMatches || studentFound;
             }
-        } else if (searchField == "ID Number") {
+        } else if (searchField == "I.D. Number") {
             for (int row = 0; row < studentModel->rowCount(); ++row) {
                 QString idNumber = studentModel->item(row, 0)->text().trimmed();
                 if (idNumber.contains(searchTerm.trimmed(), Qt::CaseInsensitive)) {
@@ -1390,7 +1394,6 @@ void MainWindow::on_Search_clicked()
 }
 
 
-
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     qDebug() << "Tab changed to index:" << index; // Debug log to check tab index
@@ -1401,7 +1404,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     case 0: // Student Tab
         qDebug() << "Populating Searchby for Student Tab";
         ui->Searchby->addItem("All Fields");  // Add "All Fields" for Student Tab
-        ui->Searchby->addItem("ID Number");   // ID Number is the first column
+        ui->Searchby->addItem("I.D. Number");   // ID Number is the first column
         ui->Searchby->addItem("Last Name");   // Last Name is the fourth column
         ui->Searchby->addItem("First Name");  // First Name is the second column
         ui->Searchby->addItem("Middle Name"); // Middle Name is the third column
